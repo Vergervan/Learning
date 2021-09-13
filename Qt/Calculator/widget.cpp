@@ -9,6 +9,7 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+
 }
 
 Widget::~Widget()
@@ -37,19 +38,22 @@ void Widget::keyPressEvent(QKeyEvent *event){
 
 void Widget::AddNum(char ch){
     if(r_a == "0" && ch != '.') ClearAll();
-    if(op == None) r_a.append(ch); //Добавляем символ числа
-    else{
-        if(r_b == "0" && ch != '.') r_b.clear();
-        r_b.append(ch);
-    }
+    if(r_a == "-" && ch == '-') return;
+    if(this->op == None) r_a.append(ch); //Добавляем символ числа
+
+    if(r_b == "0" && ch != '.') r_b.clear();
+    if(r_b == "-" && ch == '-') return;
+    if(this->op != None) r_b.append(ch);
+
     RefreshText();
 }
 
 void Widget::SetOperation(Operation op){
-    if(r_a.length() < 1 && op == Subtract){
-        AddNum('-'); //Добавляем минус в начало первого числа
+    if(r_a.length() < 1){
+        if(op == Subtract) AddNum('-'); //Добавляем минус в начало первого числа
         return;
-    }else if(this->op != None && r_b.length() < 1 && op == Subtract) {
+    }else if(r_a == "-" && op == Subtract) return;
+    else if(this->op != None && r_b.length() < 1 && op == Subtract) {
         AddNum('-');
         return;
     }
@@ -93,7 +97,7 @@ void Widget::Calculate(){
             break;
     }
     ClearAll();
-    r_a = QString::number(numC, 'g', 6); //Преобразуем результат в строку
+    r_a = QString::number(numC); //Преобразуем результат в строку
     RefreshText();
 }
 //Удаление последней цифры или знака
