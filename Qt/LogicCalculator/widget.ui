@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Widget</class>
+ <widget class="QWidget" name="Widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>676</width>
+    <height>257</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Widget</string>
+  </property>
+  <widget class="QComboBox" name="firstOperandCmb">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>110</y>
+     <width>141</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>False</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>True</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="cmbOperation">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>110</y>
+     <width>141</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>И</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ИЛИ</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ИСКЛЮЧАЮЩЕЕ ИЛИ</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>НЕ</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>РАВНО</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>НЕ РАВНО</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="secondOperandCmb">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>110</y>
+     <width>141</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>False</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>True</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="resultLabel">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>30</y>
+     <width>221</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>18</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
