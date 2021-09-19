@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Widget</string>
+   <string>Логический калькуляктор</string>
   </property>
   <widget class="QComboBox" name="firstOperandCmb">
    <property name="geometry">

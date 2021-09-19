@@ -13,7 +13,7 @@ class Widget : public QWidget
 
 public:
 
-    void ChangeBackGroundColor(bool);
+    void ChangeBackgroundColor(bool);
     void Calculate();
 
     Widget(QWidget *parent = nullptr);
