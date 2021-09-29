@@ -2,16 +2,17 @@
 #include "ui_widget.h"
 #include "character.h"
 
+#define ORANGE "#fe9600"
+#define YELLOW "#fed200"
+#define GREEN "#66c500"
+
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-
-    msgBox.setWindowTitle("Ошибка");
     msgBox.setStandardButtons(QMessageBox::Ok);
-
-    RefreshCharacterInfo();
+    refreshCharacterInfo();
 }
 
 Widget::~Widget()
@@ -19,42 +20,68 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::RefreshCharacterInfo(){
-    ui->availablePointsCountLabel->setText(QString::number(character.maxAvailablePoints));
-    ui->strengthCountLabel->setText(QString::number(character.strength));
-    ui->agilityCountLabel->setText(QString::number(character.agility));
-    ui->intelligenceCountLabel->setText(QString::number(character.intelligence));
-    ui->enduranceCountLabel->setText(QString::number(character.endurance));
+void Widget::refreshCharacterInfo(){
+    ui->availablePointsLabel->setText("Доступно очков прокачки: " + QString::number(character.maxAvailablePoints));
+
+    setStatText(ui->strengthCountLabel, character.strength);
+    setStatText(ui->agilityCountLabel, character.agility);
+    setStatText(ui->intelligenceCountLabel, character.intelligence);
+    setStatText(ui->enduranceCountLabel, character.endurance);
+
     ui->healthCountLabel->setText(QString::number(character.health));
     ui->damageCountLabel->setText(QString::number(character.damage));
     ui->manaCountLabel->setText(QString::number(character.mana));
     ui->weightCountLabel->setText(QString::number(character.weight));
 }
 
-void Widget::callMessageBox(QString str){
+void Widget::callErrorBox(QString str){
+    msgBox.setWindowTitle("Ошибка");
     msgBox.setText(str);
     msgBox.show();
 }
 
-void Widget::on_strengthPlusButton_clicked(){ character.incStrength(); RefreshCharacterInfo();}
-void Widget::on_agilityPlusButton_clicked(){ character.incAgility(); RefreshCharacterInfo();}
-void Widget::on_intelligencePlusButton_clicked(){ character.incIntelligence(); RefreshCharacterInfo();}
-void Widget::on_endurancePlusButton_clicked(){ character.incEndurance(); RefreshCharacterInfo();}
-void Widget::on_strengthMinusButton_clicked(){ character.decStrength(); RefreshCharacterInfo();}
-void Widget::on_agilityMinusButton_clicked(){ character.decAgility(); RefreshCharacterInfo();}
-void Widget::on_intelligenceMinusButton_clicked(){ character.decIntelligence(); RefreshCharacterInfo();}
-void Widget::on_enduranceMinusButton_clicked(){ character.decEndurance(); RefreshCharacterInfo();}
-void Widget::on_maleButton_clicked()
-{
-    character.gender = Male;
+void Widget::callMessageBox(QString str){
+    msgBox.setWindowTitle("Сообщение");
+    msgBox.setText(str);
+    msgBox.show();
 }
 
+void Widget::setStatText(QLabel* lbl, int stat){
+    lbl->setText(QString::number(stat));
+    lbl->setStyleSheet(getStatColor(stat));
+}
+
+const char* Widget::getStatColor(int x){
+    std::string str = "color:";
+    str += (x <= 3 ? ORANGE : (x <= 7 ? YELLOW : GREEN));
+    str += ";";
+    return str.c_str();
+}
+
+void Widget::changeCharacterStats(CharacterStat cs, Operation op){
+    int err = character.changeStat(cs, op);
+    if(err == -1) callErrorBox("Превышен лимит характеристики персонажа");
+    refreshCharacterInfo();
+}
+
+void Widget::on_strengthPlusButton_clicked(){ changeCharacterStats(Strength, Increment); }
+void Widget::on_agilityPlusButton_clicked(){ changeCharacterStats(Agility, Increment); }
+void Widget::on_intelligencePlusButton_clicked(){ changeCharacterStats(Intelligence, Increment); }
+void Widget::on_endurancePlusButton_clicked(){ changeCharacterStats(Endurance, Increment); }
+void Widget::on_strengthMinusButton_clicked(){ changeCharacterStats(Strength, Decrement); }
+void Widget::on_agilityMinusButton_clicked(){ changeCharacterStats(Agility, Decrement); }
+void Widget::on_intelligenceMinusButton_clicked(){ changeCharacterStats(Intelligence, Decrement); }
+void Widget::on_enduranceMinusButton_clicked(){ changeCharacterStats(Endurance, Decrement); }
+
+void Widget::on_maleButton_clicked()
+{
+    character.gender = Gender::Male;
+}
 
 void Widget::on_femaleButton_clicked()
 {
-    character.gender = Female;
+    character.gender = Gender::Female;
 }
-
 
 void Widget::on_nameEdit_textEdited(const QString &arg1)
 {
@@ -62,3 +89,17 @@ void Widget::on_nameEdit_textEdited(const QString &arg1)
     //qDebug(character.name.c_str());
 }
 
+void Widget::on_createButton_clicked()
+{
+    if(character.name == "") {
+        callErrorBox("Не указано имя персонажа");
+        return;
+    }else if(character.gender == Gender::None) {
+        callErrorBox("Не указан пол персонажа");
+        return;
+    }else if(character.maxAvailablePoints > 0){
+        callErrorBox("Не распределены все очки прокачки");
+        return;
+    }
+    callMessageBox("Персонаж успешно создан");
+}
