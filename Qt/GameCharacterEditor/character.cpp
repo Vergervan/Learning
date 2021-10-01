@@ -7,8 +7,35 @@ void Character::calculateSecondaryCharacterValues(){
     weight = endurance * WEIGHT_RATE;
 }
 
+void Character::calculateClass(){
+    if(strength >= agility && strength >= intelligence){
+        if(agility > intelligence){
+            (float)strength/agility < CLASS_UNION_RATIO ? setCharacterClass(Knight) : setCharacterClass(Tank);
+        }else{
+            (float)strength/intelligence < CLASS_UNION_RATIO ? setCharacterClass(Paladin) : setCharacterClass(Tank);
+        }
+    }else if(agility >= strength && agility >= intelligence){
+        if(strength > intelligence){
+            (float)agility/strength < CLASS_UNION_RATIO ? setCharacterClass(Knight) : setCharacterClass(Warrior);
+        }else{
+            (float)agility/intelligence < CLASS_UNION_RATIO ? setCharacterClass(Bard) : setCharacterClass(Warrior);
+        }
+    }else if(intelligence >= agility && intelligence >= strength){
+        if(strength > agility){
+            (float)intelligence/agility < CLASS_UNION_RATIO ? setCharacterClass(Bard) : setCharacterClass(Mage);
+        }else{
+            (float)intelligence/strength < CLASS_UNION_RATIO ? setCharacterClass(Paladin) : setCharacterClass(Mage);
+        }
+    }
+}
+
+//Установка класса персонажа
+void Character::setCharacterClass(CharacterClass cc){
+    ch_class = cc;
+}
+
 int Character::changeStat(CharacterStat cs, Operation op){
-    int* statValue = nullptr;
+    int* statValue = nullptr; //
     int minLimit = 0;
     switch (cs){
         case Strength:
@@ -44,5 +71,6 @@ int Character::changeStat(CharacterStat cs, Operation op){
         break;
     }
     calculateSecondaryCharacterValues();
+    calculateClass();
     return *statValue;
 }

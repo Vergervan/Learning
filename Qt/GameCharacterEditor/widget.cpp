@@ -2,6 +2,7 @@
 #include "ui_widget.h"
 #include "character.h"
 
+//Набор цветов для характеристик
 #define ORANGE "#fe9600"
 #define YELLOW "#fed200"
 #define GREEN "#66c500"
@@ -11,8 +12,8 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    refreshCharacterInfo();
+    msgBox.setStandardButtons(QMessageBox::Ok); //Заготовка для MessageBox с кнопкой Ok
+    refreshCharacterInfo(); //Стартовое обновление информации
 }
 
 Widget::~Widget()
@@ -20,8 +21,10 @@ Widget::~Widget()
     delete ui;
 }
 
+//Функция для обновления информации в UI
 void Widget::refreshCharacterInfo(){
     ui->availablePointsLabel->setText("Доступно очков прокачки: " + QString::number(character.maxAvailablePoints));
+    ui->classNameLabel->setText(classMap.at(character.getClass()).c_str());
 
     setStatText(ui->strengthCountLabel, character.strength);
     setStatText(ui->agilityCountLabel, character.agility);
@@ -34,23 +37,27 @@ void Widget::refreshCharacterInfo(){
     ui->weightCountLabel->setText(QString::number(character.weight));
 }
 
+//Функция для вызова окна с Ошибкой
 void Widget::callErrorBox(QString str){
     msgBox.setWindowTitle("Ошибка");
     msgBox.setText(str);
     msgBox.show();
 }
 
+//Функция для вызова сообщения
 void Widget::callMessageBox(QString str){
     msgBox.setWindowTitle("Сообщение");
     msgBox.setText(str);
     msgBox.show();
 }
 
+//Функция для изменения показателей и их цвета
 void Widget::setStatText(QLabel* lbl, int stat){
     lbl->setText(QString::number(stat));
     lbl->setStyleSheet(getStatColor(stat));
 }
 
+//Функция для получения цвета, соответствующего уровню характеристики персонажа
 const char* Widget::getStatColor(int x){
     std::string str = "color:";
     str += (x <= 3 ? ORANGE : (x <= 7 ? YELLOW : GREEN));
@@ -58,6 +65,7 @@ const char* Widget::getStatColor(int x){
     return str.c_str();
 }
 
+//Функция для изменения характеристик персонажа
 void Widget::changeCharacterStats(CharacterStat cs, Operation op){
     int err = character.changeStat(cs, op);
     if(err == -1) callErrorBox("Превышен лимит характеристики персонажа");
@@ -89,8 +97,10 @@ void Widget::on_nameEdit_textEdited(const QString &arg1)
     //qDebug(character.name.c_str());
 }
 
+//Клик по кнопке создания персонажа
 void Widget::on_createButton_clicked()
 {
+    //Проверка на различные ошибки
     if(character.name == "") {
         callErrorBox("Не указано имя персонажа");
         return;

@@ -15,8 +15,10 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    Character character;
-    void refreshCharacterInfo();
+    //Словарь с текстовым представлением классов персонажа
+    std::map<CharacterClass, std::string> classMap {{None, "Ничтожество"}, {Tank, "Танк"}, {Warrior, "Воин"}, {Mage, "Маг"}, {Knight, "Рыцарь"}, {Paladin, "Паладин"}, {Bard, "Бард"}};
+    Character character; //Переменная персонажа
+    void refreshCharacterInfo(); //Обновление информации о персонаже на форме
     void setStatText(QLabel*, int);
     const char* getStatColor(int);
     Widget(QWidget *parent = nullptr);
