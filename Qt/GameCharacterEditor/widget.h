@@ -16,7 +16,9 @@ class Widget : public QWidget
 
 public:
     //Словарь с текстовым представлением классов персонажа
-    std::map<CharacterClass, std::string> classMap {{None, "Ничтожество"}, {Tank, "Танк"}, {Warrior, "Воин"}, {Mage, "Маг"}, {Knight, "Рыцарь"}, {Paladin, "Паладин"}, {Bard, "Бард"}};
+    std::map<CharacterClass, std::string> classMap {{None, "Ничтожество"}, {Tank, "Танк"}, {Warrior, "Воин"},
+                                                    {Mage, "Маг"}, {Knight, "Рыцарь"}, {Paladin, "Паладин"},
+                                                    {Bard, "Бард" }, {Master, "Мастер"}};
     Character character; //Переменная персонажа
     void refreshCharacterInfo(); //Обновление информации о персонаже на форме
     void setStatText(QLabel*, int);

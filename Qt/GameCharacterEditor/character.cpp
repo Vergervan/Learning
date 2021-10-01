@@ -9,23 +9,28 @@ void Character::calculateSecondaryCharacterValues(){
 
 void Character::calculateClass(){
     if(strength >= agility && strength >= intelligence){
-        if(agility > intelligence){
+        if(agility == intelligence)
+            (float)strength/agility < CLASS_UNION_RATIO ? setCharacterClass(Master) : setCharacterClass(Tank);
+        else if(agility > intelligence)
             (float)strength/agility < CLASS_UNION_RATIO ? setCharacterClass(Knight) : setCharacterClass(Tank);
-        }else{
+        else
             (float)strength/intelligence < CLASS_UNION_RATIO ? setCharacterClass(Paladin) : setCharacterClass(Tank);
-        }
+
     }else if(agility >= strength && agility >= intelligence){
-        if(strength > intelligence){
+        if(strength == intelligence)
+            (float)agility/strength < CLASS_UNION_RATIO ? setCharacterClass(Master) : setCharacterClass(Warrior);
+        else if(strength > intelligence)
             (float)agility/strength < CLASS_UNION_RATIO ? setCharacterClass(Knight) : setCharacterClass(Warrior);
-        }else{
+        else
             (float)agility/intelligence < CLASS_UNION_RATIO ? setCharacterClass(Bard) : setCharacterClass(Warrior);
-        }
+
     }else if(intelligence >= agility && intelligence >= strength){
-        if(strength > agility){
+        if(strength == agility)
+            (float)agility/strength < CLASS_UNION_RATIO ? setCharacterClass(Master) : setCharacterClass(Mage);
+        else if(strength > agility)
             (float)intelligence/agility < CLASS_UNION_RATIO ? setCharacterClass(Bard) : setCharacterClass(Mage);
-        }else{
+        else
             (float)intelligence/strength < CLASS_UNION_RATIO ? setCharacterClass(Paladin) : setCharacterClass(Mage);
-        }
     }
 }
 

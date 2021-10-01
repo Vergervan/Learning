@@ -36,7 +36,7 @@ enum CharacterStat{
 
 //Возможные классы персонажей
 enum CharacterClass{
-    None, Tank, Warrior, Mage, Knight, Paladin, Bard
+    None, Tank, Warrior, Mage, Knight, Paladin, Bard, Master
 };
 
 
