@@ -29,9 +29,11 @@ private slots:
     void on_y3Edit_textChanged(const QString &arg1);
 
 private:
-    bool checkEditResult(QLineEdit*);
+    bool checkEditResult(QLineEdit*, bool);
     void refreshResultsStyle();
-    bool ok = true;
+    void readPoints();
+    bool hasError = false;
+
     Ui::Widget *ui;
 };
 #endif // WIDGET_H

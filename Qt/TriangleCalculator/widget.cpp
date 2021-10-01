@@ -9,7 +9,7 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    calculateAll();
+    readPoints();
 }
 
 Widget::~Widget()
@@ -22,50 +22,61 @@ void Widget::calculateAll(){
     ui->squareEdit->setText(QString::number(trngl.getSquare(), 'f', 2));
 }
 
-bool Widget::checkEditResult(QLineEdit* le){
+bool Widget::checkEditResult(QLineEdit* le, bool ok){
+
     le->setStyleSheet(ok ? COLOR_SUCCESS : COLOR_ERROR);
     refreshResultsStyle();
     return ok;
 }
 
+void Widget::readPoints(){
+    hasError = false;
+    bool ok = true;
+
+    trngl.point1.x = ui->x1Edit->text().toInt(&ok);
+    if(!checkEditResult(ui->x1Edit, ok)) hasError = true;
+    trngl.point1.y = ui->y1Edit->text().toInt(&ok);
+    if(!checkEditResult(ui->y1Edit, ok)) hasError = true;
+    trngl.point2.x = ui->x2Edit->text().toInt(&ok);
+    if(!checkEditResult(ui->x2Edit, ok)) hasError = true;
+    trngl.point2.y = ui->y2Edit->text().toInt(&ok);
+    if(!checkEditResult(ui->y2Edit, ok)) hasError = true;
+    trngl.point3.x = ui->x3Edit->text().toInt(&ok);
+    if(!checkEditResult(ui->x3Edit, ok)) hasError = true;
+    trngl.point3.y = ui->y3Edit->text().toInt(&ok);
+    if(!checkEditResult(ui->y3Edit, ok)) hasError = true;
+
+    if(hasError) return refreshResultsStyle();
+
+    calculateAll();
+}
+
 void Widget::refreshResultsStyle(){
-    if(ok){
+    if(!hasError){
         ui->perimeterEdit->setStyleSheet(COLOR_SUCCESS);
         ui->squareEdit->setStyleSheet(COLOR_SUCCESS);
     }else{
-        ui->perimeterEdit->setText("Ошибка");
+        ui->perimeterEdit->setText("Ошибка расчёта");
         ui->perimeterEdit->setStyleSheet(COLOR_ERROR);
-        ui->squareEdit->setText("Ошибка");
+        ui->squareEdit->setText("Ошибка расчёта");
         ui->squareEdit->setStyleSheet(COLOR_ERROR);
     }
 }
-void Widget::on_x1Edit_textChanged(const QString &arg1){
-    trngl.point1.x = arg1.toInt(&ok);
-    if(!checkEditResult(ui->x1Edit)) return;
-    calculateAll();
+void Widget::on_x1Edit_textChanged(const QString&){
+    readPoints();
 }
-void Widget::on_y1Edit_textChanged(const QString &arg1){
-    trngl.point1.y = arg1.toInt(&ok);
-    if(!checkEditResult(ui->y1Edit)) return;
-    calculateAll();
+void Widget::on_y1Edit_textChanged(const QString&){
+    readPoints();
 }
-void Widget::on_x2Edit_textChanged(const QString &arg1){
-    trngl.point2.x = arg1.toInt(&ok);
-    if(!checkEditResult(ui->x2Edit)) return;
-    calculateAll();
+void Widget::on_x2Edit_textChanged(const QString&){
+    readPoints();
 }
-void Widget::on_y2Edit_textChanged(const QString &arg1){
-    trngl.point2.y = arg1.toInt(&ok);
-    if(!checkEditResult(ui->y2Edit)) return;
-    calculateAll();
+void Widget::on_y2Edit_textChanged(const QString&){
+    readPoints();
 }
-void Widget::on_x3Edit_textChanged(const QString &arg1){
-    trngl.point3.x = arg1.toInt(&ok);
-    if(!checkEditResult(ui->x3Edit)) return;
-    calculateAll();
+void Widget::on_x3Edit_textChanged(const QString&){
+    readPoints();
 }
-void Widget::on_y3Edit_textChanged(const QString &arg1){
-    trngl.point3.y = arg1.toInt(&ok);
-    if(!checkEditResult(ui->y3Edit)) return;
-    calculateAll();
+void Widget::on_y3Edit_textChanged(const QString&){
+    readPoints();
 }
