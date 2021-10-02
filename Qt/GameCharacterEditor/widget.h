@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include "character.h"
 #include <string>
+#include <vector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -19,7 +20,7 @@ public:
     std::map<CharacterClass, std::string> classMap {{None, "Ничтожество"}, {Tank, "Танк"}, {Warrior, "Воин"},
                                                     {Mage, "Маг"}, {Knight, "Рыцарь"}, {Paladin, "Паладин"},
                                                     {Bard, "Бард" }, {Master, "Мастер"}};
-    Character character; //Переменная персонажа
+    std::vector<Character> characters;
     void refreshCharacterInfo(); //Обновление информации о персонаже на форме
     void setStatText(QLabel*, int);
     const char* getStatColor(int);
@@ -41,10 +42,13 @@ private slots:
     void on_createButton_clicked();
 
 private:
+    Character character; //Переменная персонажа
     QMessageBox msgBox;
+    void addInList(Character&);
     void callMessageBox(QString);
     void callErrorBox(QString);
     void changeCharacterStats(CharacterStat cs, Operation op);
+    void refreshCharactersList();
     Ui::Widget *ui;
 };
 #endif // WIDGET_H

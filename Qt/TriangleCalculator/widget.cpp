@@ -9,6 +9,7 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    ui->x1Edit->setFocus();
     readPoints();
 }
 
@@ -18,8 +19,11 @@ Widget::~Widget()
 }
 
 void Widget::calculateAll(){
-    ui->perimeterEdit->setText(QString::number(trngl.getPerimeter(), 'f', 2));
-    ui->squareEdit->setText(QString::number(trngl.getSquare(), 'f', 2));
+    double p = trngl.getPerimeter();
+    double s = trngl.getSquare();
+    if(s <= 0) ui->squareEdit->setText("Вырожденный треугольник");
+    else ui->squareEdit->setText(QString::number(s, 'f', 2));
+    ui->perimeterEdit->setText(QString::number(p, 'f', 2));
 }
 
 bool Widget::checkEditResult(QLineEdit* le, bool ok){

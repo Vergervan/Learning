@@ -3,7 +3,7 @@
 
 #include <string>
 
-#define MAX_POINTS 20 //Максимальное количество очков прокачки
+#define MAX_POINTS 3 //Максимальное количество очков прокачки
 
 #define HEALTH_RATE 9 //Здоровья за единицу силы
 #define DAMAGE_RATE 6 //Урона за единицу ловкости
@@ -52,7 +52,7 @@ public:
         calculateSecondaryCharacterValues(); //Стартовый расчёт вторичных характеристик
     }
 
-    std::string name; //Имя персонажа
+    std::string name = ""; //Имя персонажа
     Gender::Gender gender = Gender::None; //Пол персонажа
     int strength = 0, agility = 0, intelligence = 0, endurance = 0; //Первичные характеристики
     float health = 0, damage = 0, mana = 0, weight = 0; //Вторичные характеристики

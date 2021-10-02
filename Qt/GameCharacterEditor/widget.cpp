@@ -25,6 +25,7 @@ Widget::~Widget()
 void Widget::refreshCharacterInfo(){
     ui->availablePointsLabel->setText("Доступно очков прокачки: " + QString::number(character.maxAvailablePoints));
     ui->classNameLabel->setText(classMap.at(character.getClass()).c_str());
+    ui->nameEdit->setText(QString(character.name.c_str()));
 
     setStatText(ui->strengthCountLabel, character.strength);
     setStatText(ui->agilityCountLabel, character.agility);
@@ -97,6 +98,17 @@ void Widget::on_nameEdit_textEdited(const QString &arg1)
     //qDebug(character.name.c_str());
 }
 
+void Widget::refreshCharactersList(){
+    ui->charactersList->clear();
+    for(auto it = characters.begin(); it != characters.end(); ++it){
+        std::string pattern = "Имя: ";
+        pattern += it->name;
+        pattern += "\nКласс: ";
+        pattern += classMap.at(it->getClass());
+        ui->charactersList->addItem(QString(pattern.c_str()));
+    }
+}
+
 //Клик по кнопке создания персонажа
 void Widget::on_createButton_clicked()
 {
@@ -111,5 +123,11 @@ void Widget::on_createButton_clicked()
         callErrorBox("Не распределены все очки прокачки");
         return;
     }
+    characters.push_back(character);
+    character = Character();
+    refreshCharacterInfo();
+    refreshCharactersList();
+    ui->maleButton->setChecked(false);
+    ui->femaleButton->setChecked(false);
     callMessageBox("Персонаж успешно создан");
 }
