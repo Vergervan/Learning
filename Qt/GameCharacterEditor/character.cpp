@@ -62,7 +62,7 @@ int Character::changeStat(CharacterStat cs, Operation op){
     }
     switch(op){
         case Increment:
-            if(*statValue == 10) return -1;
+            if(*statValue == MAX_STAT_LIMIT) return -1;
             if(maxAvailablePoints > 0) {
                 (*statValue)++;
                 maxAvailablePoints--;

@@ -44,7 +44,7 @@ private slots:
 private:
     Character character; //Переменная персонажа
     QMessageBox msgBox;
-    void addInList(Character&);
+    void resetGenderButtons();
     void callMessageBox(QString);
     void callErrorBox(QString);
     void changeCharacterStats(CharacterStat cs, Operation op);
