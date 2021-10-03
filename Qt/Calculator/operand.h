@@ -6,8 +6,7 @@
 class Operand{
 private:
     QString numStr;
-    void checkUniqueChars();
-    bool _signed, _pointed, _zero;
+    bool _signed = false, _pointed = false, _zero = false;
 public:
     inline void setIsSigned(bool s){
         _signed = s;
@@ -32,5 +31,9 @@ public:
     int length();
     int trueLength();
     void removeLastCharacter();
+    void checkSpecialCharacters();
+    inline int startNumberPosition(){
+        return _signed ? 1 : 0;
+    }
 };
 #endif // OPERAND_H

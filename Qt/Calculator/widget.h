@@ -24,7 +24,6 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    QString r_a, r_b; //Строки для чисел a,b
     Operand oa, ob; //Операнд A и B;
     Operation op = None; //Переменная для хранения выбранной операции
 
@@ -35,6 +34,7 @@ public:
     void RefreshText(); //Обновление значений на экране
     void ClearAll(); //Очистка всех полей
     void Stepback(); //Backspace-функция
+    void CheckEmptyPoint(Operand&);
 
     Widget(QWidget *parent = nullptr);
     ~Widget();

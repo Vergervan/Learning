@@ -20,7 +20,6 @@ Widget::~Widget()
 
 //Функция для ввода с клавиатуры
 void Widget::keyPressEvent(QKeyEvent *event){
-    //qDebug(QString::number(event->key(), 16).toStdString().c_str());
     if(event->key() == Qt::Key_Backspace)  Stepback();
     if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Equal) Calculate();
     auto ch = std::find(validChars.begin(), validChars.end(), (char)event->key());
@@ -38,14 +37,6 @@ void Widget::keyPressEvent(QKeyEvent *event){
 }
 
 void Widget::AddNum(char ch){
-    /*QString regStr = "^(-)?(0)?(\.)?[^0.-]*"; //"^(-)?(0\.[0-9]+)"
-    QRegularExpression self_regex(regStr);
-    QRegularExpressionMatch match = self_regex.match(r_a);
-    if(match.hasMatch()){
-        if(match.captured(1) == "-" && ch == '-') return;
-        if(match.captured(2) == "0" && ch == '0') return;
-        if(match.captured(3) == "." && ch == '.') return;
-    }*/
     if(this->op == None){
         CheckOperand(oa, ch);
     }else{
@@ -57,34 +48,35 @@ void Widget::AddNum(char ch){
 
 void Widget::CheckOperand(Operand& op, char ch){
     switch(ch){
-    case '-':
-        if(op.trueLength() > 0 || op.getIsSigned()) return;
-        op.setIsSigned(true);
-        break;
-    case '.':
-        if(op.findCharInOperand(ch) || op.length() < 1) return;
-        op.setIsPointed(true);
-        break;
-    case '0':
-        if(op.length() > 0 && op.getIsZero()) return;
-        op.setIsZero(true);
-        break;
+        case '-':
+            if(op.trueLength() > 0 || op.getIsSigned()) return;
+            op.setIsSigned(true);
+            break;
+        case '.':
+            if(op.findCharInOperand(ch) || op.length() < 1) return;
+            op.setIsPointed(true);
+            break;
+        case '0':
+            if(op.length() > 0 && op.getIsZero() && !op.getIsPointed()) return;
+            op.setIsZero(true);
+            break;
     }
 
     op.addChar(ch);
 }
 
 void Widget::SetOperation(Operation op){
+    CheckEmptyPoint(oa);
+    CheckEmptyPoint(ob);
     if(!oa.getIsSigned() && op == Subtract){
         AddNum('-');
         return;
     }
     if(oa.length() < 1) return;
-    if(!ob.getIsSigned() && op == Subtract){
+    if(op == Subtract && !ob.getIsSigned() && this->op == Subtract){
         AddNum('-');
         return;
     }
-
     this->op = op;
     RefreshText();
 }
@@ -105,10 +97,10 @@ void Widget::ClearAll(){
 }
 
 void Widget::Calculate(){
-    if(op == None || r_b.length() < 1) return;
-    float numA = 0, numB = 0, numC = 0;
-    numA = oa.toFloat();
-    numB = ob.toFloat();
+    if(op == None || ob.length() < 1) return;
+    double numA = 0, numB = 0, numC = 0;
+    numA = oa.toDouble();
+    numB = ob.toDouble();
     switch(op){
         case Add:
             numC = numA+numB;
@@ -134,6 +126,15 @@ void Widget::Stepback(){
     else if(op != None) op = None;
     else oa.removeLastCharacter();
     RefreshText();
+}
+
+void Widget::CheckEmptyPoint(Operand& op){
+    for(int i = 0; i < op.trueLength(); i++){
+        if(op.getString()[i] == '.' && i == op.trueLength()-1) {
+            op.removeLastCharacter();
+            return;
+        }
+    }
 }
 
 void Widget::on_buttonNum0_clicked()

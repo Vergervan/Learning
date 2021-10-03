@@ -16,19 +16,13 @@ bool Operand::findCharInOperand(char ch){
 void Operand::setValue(QString str){
     clear();
     numStr = str;
-    checkUniqueChars();
+    checkSpecialCharacters();
 }
 
 void Operand::setValue(const char *str){
     clear();
     numStr = str;
-    checkUniqueChars();
-}
-
-void Operand::checkUniqueChars(){
-    setIsSigned(findCharInOperand('-'));
-    setIsPointed(findCharInOperand('.'));
-    setIsZero(getIsSigned() ? (numStr[1] == '0' ? true : false) : (numStr[0] == '0' ? true : false));
+    checkSpecialCharacters();
 }
 
 void Operand::addChar(char ch){ numStr.append(ch); }
@@ -38,6 +32,12 @@ void Operand::clear(){
     setIsSigned(false);
     setIsPointed(false);
     setIsZero(false);
+}
+
+void Operand::checkSpecialCharacters(){
+    setIsSigned(findCharInOperand('-'));
+    setIsPointed(findCharInOperand('.'));
+    setIsZero(numStr[startNumberPosition()] == '0');
 }
 
 void Operand::removeLastCharacter(){
