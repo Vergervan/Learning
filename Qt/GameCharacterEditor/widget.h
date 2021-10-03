@@ -23,7 +23,6 @@ public:
     std::vector<Character> characters;
     void refreshCharacterInfo(); //Обновление информации о персонаже на форме
     void setStatText(QLabel*, int);
-    const char* getStatColor(int);
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
@@ -49,6 +48,7 @@ private:
     void callErrorBox(QString);
     void changeCharacterStats(CharacterStat cs, Operation op);
     void refreshCharactersList();
+    void changeStatLabelColor(QLabel*, int);
     Ui::Widget *ui;
 };
 #endif // WIDGET_H

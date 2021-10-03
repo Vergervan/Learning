@@ -2,16 +2,12 @@
 #include "ui_widget.h"
 #include "character.h"
 
-//Набор цветов для характеристик
-#define ORANGE "#fe9600"
-#define YELLOW "#fed200"
-#define GREEN "#66c500"
-
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    setStyle(QApplication::style());
     msgBox.setStandardButtons(QMessageBox::Ok); //Заготовка для MessageBox с кнопкой Ok
     refreshCharacterInfo(); //Стартовое обновление информации
 }
@@ -54,15 +50,18 @@ void Widget::callMessageBox(QString str){
 //Функция для изменения показателей и их цвета
 void Widget::setStatText(QLabel* lbl, int stat){
     lbl->setText(QString::number(stat));
-    lbl->setStyleSheet(getStatColor(stat));
+    changeStatLabelColor(lbl, stat);
 }
 
-//Функция для получения цвета, соответствующего уровню характеристики персонажа
-const char* Widget::getStatColor(int x){
-    std::string str = "color:";
-    str += (x <= 3 ? ORANGE : (x <= 7 ? YELLOW : GREEN));
-    str += ";";
-    return str.c_str();
+void Widget::changeStatLabelColor(QLabel* lbl, int x){
+    if(x <= 3)
+        lbl->setProperty("level", "normal");
+    else if(x <= 7)
+        lbl->setProperty("level", "good");
+    else
+        lbl->setProperty("level", "nice");
+    lbl->style()->unpolish(lbl); //Действия для обновления стиля кнопки
+    lbl->style()->polish(lbl);
 }
 
 //Функция для изменения характеристик персонажа

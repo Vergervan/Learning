@@ -1,0 +1,11 @@
+QLabel[level = "normal"]{
+    color:#fe9600;
+}
+
+QLabel[level = "good"]{
+    color:#fed200;
+}
+
+QLabel[level = "nice"]{
+    color:#66c500;
+}
