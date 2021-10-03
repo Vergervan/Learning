@@ -3,7 +3,8 @@
 
 #include <string>
 
-#define MAX_POINTS 3 //Максимальное количество очков прокачки
+#define MAX_POINTS 20 //Максимальное количество очков прокачки
+#define MAX_STAT_LIMIT 10 //Максимальный уровень характеристики
 
 #define HEALTH_RATE 9 //Здоровья за единицу силы
 #define DAMAGE_RATE 6 //Урона за единицу ловкости

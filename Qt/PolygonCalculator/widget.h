@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QListWidgetItem>
 #include <map>
+#include <math.h> //sqrt, pow
 #include "point.h"
 
 #define POINT_NAME "Точка "
@@ -19,6 +20,7 @@ class Widget : public QWidget
 public:
     std::map<QListWidgetItem*, Point*> points;
     void addPoint();
+    double dabs(double x);
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
@@ -34,7 +36,10 @@ private slots:
     void on_yEdit_textChanged(const QString &arg1);
 
 private:
-    void calculateSides();
+    double calculatePerimeter();
+    void calculatePolygonSides();
+    double calculatePolygonSquare();
+    void calculateAll();
     Ui::Widget *ui;
 };
 #endif // WIDGET_H

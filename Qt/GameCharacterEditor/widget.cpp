@@ -25,7 +25,6 @@ Widget::~Widget()
 void Widget::refreshCharacterInfo(){
     ui->availablePointsLabel->setText("Доступно очков прокачки: " + QString::number(character.maxAvailablePoints));
     ui->classNameLabel->setText(classMap.at(character.getClass()).c_str());
-    ui->nameEdit->setText(QString(character.name.c_str()));
 
     setStatText(ui->strengthCountLabel, character.strength);
     setStatText(ui->agilityCountLabel, character.agility);
@@ -98,8 +97,19 @@ void Widget::on_nameEdit_textEdited(const QString &arg1)
     //qDebug(character.name.c_str());
 }
 
+//Сбрасывает выделение с кнопок пола
+void Widget::resetGenderButtons(){
+    ui->maleButton->setAutoExclusive(false);
+    ui->maleButton->setChecked(false);
+    ui->maleButton->setAutoExclusive(true);
+
+    ui->femaleButton->setAutoExclusive(false);
+    ui->femaleButton->setChecked(false);
+    ui->femaleButton->setAutoExclusive(true);
+}
+
 void Widget::refreshCharactersList(){
-    ui->charactersList->clear();
+    ui->charactersList->clear(); //Очишаем список персонажей перед новым заполнением
     for(auto it = characters.begin(); it != characters.end(); ++it){
         std::string pattern = "Имя: ";
         pattern += it->name;
@@ -123,11 +133,11 @@ void Widget::on_createButton_clicked()
         callErrorBox("Не распределены все очки прокачки");
         return;
     }
-    characters.push_back(character);
-    character = Character();
-    refreshCharacterInfo();
-    refreshCharactersList();
-    ui->maleButton->setChecked(false);
-    ui->femaleButton->setChecked(false);
+    characters.push_back(character); //Добавляем класс персонажа в вектор
+    character = Character(); //Сбрасываем переменную персонажа
+    ui->nameEdit->clear(); //Очищаем поле имени персонажа
+    refreshCharacterInfo(); //Обновляем информацию о персонаже
+    refreshCharactersList(); //Обновляем список всех персонажей
+    resetGenderButtons(); //Сбрасываем кнопки выбора пола
     callMessageBox("Персонаж успешно создан");
 }
