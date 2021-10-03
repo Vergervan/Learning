@@ -83,15 +83,15 @@ double Widget::calculatePolygonSquare(){
 void Widget::on_addPointButton_clicked()
 {
     addPoint();
+    calculateAll();
 }
 
 
 void Widget::on_removePointButton_clicked()
 {
     if(ui->pointList->count() < 1) return;
-    //if(ui->pointList->selectedItems().count() < 1)
     delete ui->pointList->item(ui->pointList->count()-1);
-    //else if(ui->pointList->selectedItems().count() == 1) delete ui->pointList->selectedItems()[0];
+    calculateAll();
 }
 
 
