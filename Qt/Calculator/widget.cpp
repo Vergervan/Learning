@@ -3,13 +3,14 @@
 #include <QKeyEvent>
 #include <algorithm>
 #include <QDebug>
+#include "operand.h"
+#include <QRegularExpression>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-
 }
 
 Widget::~Widget()
@@ -37,50 +38,77 @@ void Widget::keyPressEvent(QKeyEvent *event){
 }
 
 void Widget::AddNum(char ch){
-    if(r_a == "0" && ch != '.') ClearAll();
-    if(r_a == "-" && ch == '-') return;
-    if(this->op == None) r_a.append(ch); //Добавляем символ числа
-
-    if(r_b == "0" && ch != '.') r_b.clear();
-    if(r_b == "-" && ch == '-') return;
-    if(this->op != None) r_b.append(ch);
+    /*QString regStr = "^(-)?(0)?(\.)?[^0.-]*"; //"^(-)?(0\.[0-9]+)"
+    QRegularExpression self_regex(regStr);
+    QRegularExpressionMatch match = self_regex.match(r_a);
+    if(match.hasMatch()){
+        if(match.captured(1) == "-" && ch == '-') return;
+        if(match.captured(2) == "0" && ch == '0') return;
+        if(match.captured(3) == "." && ch == '.') return;
+    }*/
+    if(this->op == None){
+        CheckOperand(oa, ch);
+    }else{
+        CheckOperand(ob, ch);
+    }
 
     RefreshText();
 }
 
+void Widget::CheckOperand(Operand& op, char ch){
+    switch(ch){
+    case '-':
+        if(op.trueLength() > 0 || op.getIsSigned()) return;
+        op.setIsSigned(true);
+        break;
+    case '.':
+        if(op.findCharInOperand(ch) || op.length() < 1) return;
+        op.setIsPointed(true);
+        break;
+    case '0':
+        if(op.length() > 0 && op.getIsZero()) return;
+        op.setIsZero(true);
+        break;
+    }
+
+    op.addChar(ch);
+}
+
 void Widget::SetOperation(Operation op){
-    if(r_a.length() < 1){
-        if(op == Subtract) AddNum('-'); //Добавляем минус в начало первого числа
-        return;
-    }else if(r_a == "-" && op == Subtract) return;
-    else if(this->op != None && r_b.length() < 1 && op == Subtract) {
+    if(!oa.getIsSigned() && op == Subtract){
         AddNum('-');
         return;
     }
+    if(oa.length() < 1) return;
+    if(!ob.getIsSigned() && op == Subtract){
+        AddNum('-');
+        return;
+    }
+
     this->op = op;
     RefreshText();
 }
 
 //Обновить текст на экране
 void Widget::RefreshText(){
-    ui->resultText->setText(r_a);
+    ui->resultText->setText(oa.getString());
     if(op == None) return;
     ui->resultText->append(QString(signMap.at(op)));
-    ui->resultText->append(r_b);
+    ui->resultText->append(ob.getString());
 }
 
 void Widget::ClearAll(){
-    r_a.clear();
-    r_b.clear();
+    oa.clear();
+    ob.clear();
     op = None;
     ui->resultText->clear();
 }
 
 void Widget::Calculate(){
     if(op == None || r_b.length() < 1) return;
-    float numA, numB, numC;
-    numA = r_a.toFloat();
-    numB = r_b.toFloat();
+    float numA = 0, numB = 0, numC = 0;
+    numA = oa.toFloat();
+    numB = ob.toFloat();
     switch(op){
         case Add:
             numC = numA+numB;
@@ -97,14 +125,14 @@ void Widget::Calculate(){
             break;
     }
     ClearAll();
-    r_a = QString::number(numC); //Преобразуем результат в строку
+    oa.setValue(QString::number(numC)); //Преобразуем результат в строку
     RefreshText();
 }
 //Удаление последней цифры или знака
 void Widget::Stepback(){
-    if(r_b.length() > 0) r_b.remove(r_b.length()-1, r_b.length());
+    if(ob.trueLength() > 0) ob.removeLastCharacter();
     else if(op != None) op = None;
-    else r_a.remove(r_a.length()-1, r_a.length());
+    else oa.removeLastCharacter();
     RefreshText();
 }
 

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <vector>
 #include <map>
+#include "operand.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -24,14 +25,17 @@ class Widget : public QWidget
 
 public:
     QString r_a, r_b; //Строки для чисел a,b
+    Operand oa, ob; //Операнд A и B;
     Operation op = None; //Переменная для хранения выбранной операции
 
-    void AddNum(char);
-    void SetOperation(Operation);
-    void Calculate();
-    void RefreshText();
-    void ClearAll();
-    void Stepback();
+    void AddNum(char); //Добавить цифру или знак
+    void CheckOperand(Operand&, char); //Проверка операнда на доступность добавления знаков
+    void SetOperation(Operation); //Установка операции
+    void Calculate(); //Расчёт результата
+    void RefreshText(); //Обновление значений на экране
+    void ClearAll(); //Очистка всех полей
+    void Stepback(); //Backspace-функция
+
     Widget(QWidget *parent = nullptr);
     ~Widget();
 protected:
