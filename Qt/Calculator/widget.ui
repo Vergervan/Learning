@@ -289,7 +289,7 @@ Back</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>14</pointsize>
+       <pointsize>18</pointsize>
       </font>
      </property>
      <property name="layoutDirection">

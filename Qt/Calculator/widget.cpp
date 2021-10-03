@@ -68,12 +68,12 @@ void Widget::CheckOperand(Operand& op, char ch){
 void Widget::SetOperation(Operation op){
     CheckEmptyPoint(oa);
     CheckEmptyPoint(ob);
-    if(!oa.getIsSigned() && op == Subtract){
+    if(!oa.getIsSigned() && op == Subtract && oa.trueLength() < 1){
         AddNum('-');
         return;
     }
     if(oa.length() < 1) return;
-    if(op == Subtract && !ob.getIsSigned() && this->op == Subtract){
+    if(op == Subtract && !ob.getIsSigned() && this->op != None){
         AddNum('-');
         return;
     }
@@ -225,4 +225,9 @@ void Widget::on_buttonDivide_clicked()
 void Widget::on_buttonPoint_clicked()
 {
     AddNum('.');
+}
+//TODO Square Root Calculation
+void Widget::on_buttonSquareRoot_clicked()
+{
+
 }

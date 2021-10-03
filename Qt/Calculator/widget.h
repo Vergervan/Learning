@@ -13,7 +13,7 @@ QT_END_NAMESPACE
 class Widget : public QWidget
 {
     enum Operation{ //Перечисление возможных операций
-        None, Add, Subtract, Multiply, Divide
+        None, Add, Subtract, Multiply, Divide, SquareRoot
     };
     //Словарь символов-знаков в зависимости от операции
     std::map<Operation, char> signMap {{Add, '+'}, {Subtract, '-'}, {Multiply, '*'}, {Divide, '/'}};
@@ -76,6 +76,8 @@ private slots:
     void on_buttonResult_clicked();
 
     void on_buttonPoint_clicked();
+
+    void on_buttonSquareRoot_clicked();
 
 private:
     Ui::Widget *ui;
