@@ -3,6 +3,7 @@
 #include <QKeyEvent>
 #include <algorithm>
 #include <QDebug>
+#include <math.h>
 #include "operand.h"
 #include <QRegularExpression>
 
@@ -39,6 +40,8 @@ void Widget::keyPressEvent(QKeyEvent *event){
 void Widget::AddNum(char ch){
     if(this->op == None){
         CheckOperand(oa, ch);
+    }else if(this->op == SquareRoot){
+        return;
     }else{
         CheckOperand(ob, ch);
     }
@@ -97,7 +100,7 @@ void Widget::ClearAll(){
 }
 
 void Widget::Calculate(){
-    if(op == None || ob.length() < 1) return;
+    if(op == None || (ob.length() < 1 && this->op != SquareRoot)) return;
     double numA = 0, numB = 0, numC = 0;
     numA = oa.toDouble();
     numB = ob.toDouble();
@@ -114,6 +117,10 @@ void Widget::Calculate(){
         case Divide:
             if(numB == 0) numC = 0;
             else numC = numA/numB;
+            break;
+        case SquareRoot:
+            if(numA < 0) numC = 0;
+            else numC = sqrt(numA);
             break;
     }
     ClearAll();
@@ -229,5 +236,5 @@ void Widget::on_buttonPoint_clicked()
 //TODO Square Root Calculation
 void Widget::on_buttonSquareRoot_clicked()
 {
-
+    SetOperation(SquareRoot);
 }

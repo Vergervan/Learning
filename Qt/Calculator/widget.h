@@ -16,7 +16,7 @@ class Widget : public QWidget
         None, Add, Subtract, Multiply, Divide, SquareRoot
     };
     //Словарь символов-знаков в зависимости от операции
-    std::map<Operation, char> signMap {{Add, '+'}, {Subtract, '-'}, {Multiply, '*'}, {Divide, '/'}};
+    std::map<Operation, char> signMap {{Add, '+'}, {Subtract, '-'}, {Multiply, '*'}, {Divide, '/'}, {SquareRoot, 'R'}};
 
     //Массив доступных для ввода чисел
     std::vector<char> validChars {'0','1','2','3','4','5','6','7','8','9','.'};
