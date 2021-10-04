@@ -233,7 +233,6 @@ void Widget::on_buttonPoint_clicked()
 {
     AddNum('.');
 }
-//TODO Square Root Calculation
 void Widget::on_buttonSquareRoot_clicked()
 {
     SetOperation(SquareRoot);
