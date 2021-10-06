@@ -122,6 +122,9 @@ void Widget::Calculate(){
             if(numA < 0) numC = 0;
             else numC = sqrt(numA);
             break;
+        case Pow:
+            numC = pow(numA, numB);
+            break;
     }
     ClearAll();
     oa.setValue(QString::number(numC)); //Преобразуем результат в строку
@@ -237,3 +240,9 @@ void Widget::on_buttonSquareRoot_clicked()
 {
     SetOperation(SquareRoot);
 }
+
+void Widget::on_powButton_clicked()
+{
+    SetOperation(Pow);
+}
+
