@@ -13,10 +13,10 @@ QT_END_NAMESPACE
 class Widget : public QWidget
 {
     enum Operation{ //Перечисление возможных операций
-        None, Add, Subtract, Multiply, Divide, SquareRoot
+        None, Add, Subtract, Multiply, Divide, SquareRoot, Pow
     };
     //Словарь символов-знаков в зависимости от операции
-    std::map<Operation, char> signMap {{Add, '+'}, {Subtract, '-'}, {Multiply, '*'}, {Divide, '/'}, {SquareRoot, 'R'}};
+    std::map<Operation, char> signMap {{Add, '+'}, {Subtract, '-'}, {Multiply, '*'}, {Divide, '/'}, {SquareRoot, 'R'}, {Pow, '^'}};
 
     //Массив доступных для ввода чисел
     std::vector<char> validChars {'0','1','2','3','4','5','6','7','8','9','.'};
@@ -78,6 +78,8 @@ private slots:
     void on_buttonPoint_clicked();
 
     void on_buttonSquareRoot_clicked();
+
+    void on_powButton_clicked();
 
 private:
     Ui::Widget *ui;
