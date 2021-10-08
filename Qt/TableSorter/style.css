@@ -1,0 +1,7 @@
+QLineEdit[state="error"]{
+    color: #f92400; /* red */
+}
+QMessageBox{
+    color: red;
+}
+
