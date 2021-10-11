@@ -21,6 +21,8 @@ public:
     std::map<QListWidgetItem*, Point*> points;
     void addPoint();
     double dabs(double x);
+    double vectorMultiple(double x1, double y1, double x2, double y2);
+    bool checkCross(Point p1, Point p2, Point p3, Point p4);
     Widget(QWidget *parent = nullptr);
     ~Widget();
 

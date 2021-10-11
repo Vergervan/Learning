@@ -3,6 +3,7 @@
 
 #include <QScrollBar>
 #include <QFile>
+#include <QTimer>
 
 #define MIN_ARRAY_SIZE 1
 #define MAX_ARRAY_SIZE 100000
@@ -16,12 +17,12 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     setStyle(QApplication::style());
 
-    setupMessageBox();
+    waitBox = new QDialog;
+    setupWaitBox();
 }
 
 Widget::~Widget()
 {
-    delete waitBox;
     delete ui;
 }
 
@@ -29,13 +30,23 @@ void Widget::resizeEvent(QResizeEvent*){
     updateTableHeaderSize();
 }
 
-void Widget::setupMessageBox(){
+void Widget::setupWaitBox(){
+    QLabel* lbl = new QLabel(waitBox);
+    lbl->setText("Sorting is in the process\nPlease wait...");
+    lbl->setAlignment(Qt::AlignCenter);
+    lbl->setWordWrap(true);
+    lbl->setGeometry(0, 0, 200, 80);
+    waitBox->setFixedSize(200, 80);
+    waitBox->setWindowTitle("Message");
+}
+
+/*void Widget::setupMessageBox(){
     waitBox = new QMessageBox(this);
     waitBox->setWindowTitle("Message");
     waitBox->setStyleSheet("width: 150px;");
-    waitBox->setStandardButtons(0);
+    waitBox->setStandardButtons((QMessageBox::StandardButton)0);
     waitBox->setText("<p align='center'>Sorting is in process<br>Please wait...</p>");
-}
+}*/
 
 void Widget::updateTableHeaderSize(){
     double columnRatio = (double)(ui->dataTable->width()/30)-6.1; //Коэффициент изменения экрана
@@ -78,9 +89,10 @@ void Widget::on_arrayCountEdit_textChanged(const QString &arg1)
 
 void Widget::fillArrayRandom(){
     ui->dataTable->clearSelection();
+    srand(time(NULL));
     int x = 0;
     for(int i = 0; i < arrLen; i++){
-        x = qrand();
+        x = rand();
         ui->dataTable->item(i, 0)->setText(QString::number(x));
     }
 }
@@ -144,9 +156,6 @@ void Widget::on_sortButton_clicked()
     switch(ui->sortCmb->currentIndex()){
     case Bubble:
         callBubbleSort();
-        break;
-    case Quick:
-        callQuickSort(nums1, 0, arrLen-1);
         break;
     case Comb:
 
@@ -218,18 +227,16 @@ void Widget::callQuickSort(double* arr,int first,int last){
     }
 }
 
-void quickSort(int* arr, int left, int right){
+void Widget::quickSort(double* arr, int left, int right){
     srand(time(NULL));
     if(left >= right) return;
     int pivot = (right + left)/2;
     int i = left , j = right;
-    std::cout << arr[pivot] << std::endl;
     while(i < j){
         while(arr[i] <= arr[pivot]) ++i;
         while(arr[j] > arr[pivot]) --j;
-        std::cout << "Left: " << i << " | Right: " << j << std::endl;
         if(i < j){
-            swap(arr+i, arr+j);
+            //swap(arr+i, arr+j);
         }
     }
     quickSort(arr, left, j-1);

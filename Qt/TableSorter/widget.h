@@ -5,7 +5,9 @@
 #include <QTableWidgetItem>
 #include <QRandomGenerator>
 #include <QMessageBox>
+#include <QDialog>
 #include <chrono>
+#include <time.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -45,7 +47,7 @@ private slots:
 
     void on_sortButton_clicked();
 private:
-    QMessageBox* waitBox;
+    QDialog* waitBox;
     int arrLen = 0;
     void setWidgetProperty(QWidget*, const char*,const QVariant&);
     void setItemTextColor(QTableWidgetItem*, QColor);
@@ -53,7 +55,9 @@ private:
     bool isCreated = false;
     void resizeEvent(QResizeEvent *event);
     void updateTableHeaderSize();
-    void setupMessageBox();
+    //void setupMessageBox();
+    void setupWaitBox();
+    void quickSort(double*, int, int);
     double* getTableArray();
     Ui::Widget *ui;
 };

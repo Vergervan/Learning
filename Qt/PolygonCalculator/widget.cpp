@@ -32,11 +32,25 @@ double Widget::dabs(double x){
     return -1 * x;
 }
 
+double vectorMultiple(double x1, double y1, double x2, double y2){
+    return x1 * y2 - x2 * y1;
+}
+
+bool checkCross(Point p1, Point p2, Point p3, Point p4){
+    double v1 = 0, v2 = 0, v3 = 0, v4 = 0;
+    v1=vectorMultiple(p4.x-p3.x, p4.y-p3.y , p1.x-p3.x, p1.y-p3.y);
+    v2=vectorMultiple(p4.x-p3.x, p4.y-p3.y , p2.x-p3.x, p2.y-p3.y);
+    v3=vectorMultiple(p2.x-p1.x , p2.y-p1.y , p3.x-p1.x , p3.y-p1.y);
+    v4=vectorMultiple(p2.x-p1.x , p2.y-p1.y , p4.x-p1.x , p4.y-p1.y);
+    if ((v1*v2 < 0) && (v3*v4 < 0)) return true;
+    else return false;
+}
+
 void Widget::calculateAll(){
     calculatePolygonSides();
     double s = calculatePolygonSquare();
     double p = calculatePerimeter();
-    ui->squareEdit->setText(QString::number(s, 'f', 2));
+    ui->squareEdit->setText((QString::number(s, 'f', 2));
     ui->perimeterEdit->setText(QString::number(p, 'f', 2));
 }
 
@@ -90,7 +104,9 @@ void Widget::on_addPointButton_clicked()
 void Widget::on_removePointButton_clicked()
 {
     if(ui->pointList->count() < 1) return;
-    delete ui->pointList->item(ui->pointList->count()-1);
+    QListWidgetItem* item = ui->pointList->item(ui->pointList->count()-1);
+    points.erase(item);
+    delete item;
     calculateAll();
 }
 
