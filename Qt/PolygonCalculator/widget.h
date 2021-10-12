@@ -23,6 +23,7 @@ public:
     double dabs(double x);
     double vectorMultiple(double x1, double y1, double x2, double y2);
     bool checkCross(Point p1, Point p2, Point p3, Point p4);
+    std::map<QListWidgetItem*, Point*>::iterator getByIndex(std::map<QListWidgetItem*, Point*>::iterator start, int index);
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
@@ -41,6 +42,7 @@ private:
     double calculatePerimeter();
     void calculatePolygonSides();
     double calculatePolygonSquare();
+    bool hasCross();
     void calculateAll();
     Ui::Widget *ui;
 };

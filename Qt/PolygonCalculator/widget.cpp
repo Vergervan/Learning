@@ -32,25 +32,38 @@ double Widget::dabs(double x){
     return -1 * x;
 }
 
-double vectorMultiple(double x1, double y1, double x2, double y2){
+std::map<QListWidgetItem*, Point*>::iterator Widget::getByIndex(std::map<QListWidgetItem*, Point*>::iterator start, int index){
+    for(int i = 0; i < index-1; i++) ++start;
+    return start;
+}
+
+double Widget::vectorMultiple(double x1, double y1, double x2, double y2){
     return x1 * y2 - x2 * y1;
 }
 
-bool checkCross(Point p1, Point p2, Point p3, Point p4){
+bool Widget::checkCross(Point p1, Point p2, Point p3, Point p4){
     double v1 = 0, v2 = 0, v3 = 0, v4 = 0;
-    v1=vectorMultiple(p4.x-p3.x, p4.y-p3.y , p1.x-p3.x, p1.y-p3.y);
-    v2=vectorMultiple(p4.x-p3.x, p4.y-p3.y , p2.x-p3.x, p2.y-p3.y);
-    v3=vectorMultiple(p2.x-p1.x , p2.y-p1.y , p3.x-p1.x , p3.y-p1.y);
-    v4=vectorMultiple(p2.x-p1.x , p2.y-p1.y , p4.x-p1.x , p4.y-p1.y);
-    if ((v1*v2 < 0) && (v3*v4 < 0)) return true;
-    else return false;
+    v1 = vectorMultiple(p4.x-p3.x, p4.y-p3.y , p1.x-p3.x, p1.y-p3.y);
+    v2 = vectorMultiple(p4.x-p3.x, p4.y-p3.y , p2.x-p3.x, p2.y-p3.y);
+    v3 = vectorMultiple(p2.x-p1.x , p2.y-p1.y , p3.x-p1.x , p3.y-p1.y);
+    v4 = vectorMultiple(p2.x-p1.x , p2.y-p1.y , p4.x-p1.x , p4.y-p1.y);
+    if ((v1 * v2 < 0) && (v3 * v4 < 0)) return true;
+    return false;
+}
+
+bool Widget::hasCross(){
+    if(points.size() < 4) return false;
+    auto it = getByIndex(points.begin(), 3);
+    for(;it != points.end();++it){
+
+    }
 }
 
 void Widget::calculateAll(){
     calculatePolygonSides();
     double s = calculatePolygonSquare();
     double p = calculatePerimeter();
-    ui->squareEdit->setText((QString::number(s, 'f', 2));
+    ui->squareEdit->setText(QString::number(s, 'f', 2));
     ui->perimeterEdit->setText(QString::number(p, 'f', 2));
 }
 
@@ -79,6 +92,7 @@ void Widget::calculatePolygonSides(){
 //Расчёт площади многоульника
 double Widget::calculatePolygonSquare(){
     if(points.size() <= 1) return 0;
+
     double part1 = 0, part2 = 0;
     auto it = points.begin();
     auto end = --points.end();
