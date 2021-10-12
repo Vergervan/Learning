@@ -32,15 +32,20 @@ double Widget::dabs(double x){
     return -1 * x;
 }
 
-std::map<QListWidgetItem*, Point*>::iterator Widget::getByIndex(std::map<QListWidgetItem*, Point*>::iterator start, int index){
-    for(int i = 0; i < index-1; i++) ++start;
-    return start;
+std::vector<Point> Widget::getVectorPoints(){
+    std::vector<Point> v_points;
+    for(int i = 0; i < ui->pointList->count(); i++){
+        v_points.push_back(*points.at(ui->pointList->item(i)));
+    }
+    return v_points;
 }
 
+//Функция произведения векторов
 double Widget::vectorMultiple(double x1, double y1, double x2, double y2){
     return x1 * y2 - x2 * y1;
 }
 
+//Функция проверки пересечения 2-ух отрезков
 bool Widget::checkCross(Point p1, Point p2, Point p3, Point p4){
     double v1 = 0, v2 = 0, v3 = 0, v4 = 0;
     v1 = vectorMultiple(p4.x-p3.x, p4.y-p3.y , p1.x-p3.x, p1.y-p3.y);
@@ -51,19 +56,43 @@ bool Widget::checkCross(Point p1, Point p2, Point p3, Point p4){
     return false;
 }
 
-bool Widget::hasCross(){
-    if(points.size() < 4) return false;
-    auto it = getByIndex(points.begin(), 3);
-    for(;it != points.end();++it){
+//Функция проверки на наличие в многоульнике пересекающихся сторон
+bool Widget::hasCross(std::vector<Point> v_points){
+    if(points.size() < 4) return false; //Если в многоульнике меньше 4-ёх вершин, то он не может самопересекаться, поэтому досрочный выход
+    bool crossed = false;
 
+    unsigned int counter = 1;
+    auto it = v_points.begin();
+    auto endIt = --v_points.end();
+
+    //Цикл проверки для стороны начальной и конечной вершин
+    while(counter < v_points.size()-1){
+        if(checkCross(*(v_points.begin()+counter), *(v_points.begin()+1+counter), *it, *endIt)) crossed = true;
+        //qDebug("Checked");
+        counter++;
     }
+
+    //Цикл проверки для всех остальных сторон многоульника
+    it = v_points.begin()+3;
+    while(it != v_points.end()){
+        counter = 0;
+        while(counter < v_points.size()-3){
+            if(checkCross(*(v_points.begin()+counter), *(v_points.begin()+1+counter), *(it-1), *it)) crossed = true;
+            //qDebug("Checked");
+            counter++;
+        }
+        ++it;
+    }
+    return crossed;
 }
 
 void Widget::calculateAll(){
+    if(points.size() < 1) return;
     calculatePolygonSides();
-    double s = calculatePolygonSquare();
+    bool crossed = false;
+    double s = calculatePolygonSquare(&crossed);
     double p = calculatePerimeter();
-    ui->squareEdit->setText(QString::number(s, 'f', 2));
+    ui->squareEdit->setText(crossed ? "Самопересекающийся многоугольник" : (s == 0 ? "Вырожденный многоугольник" : QString::number(s, 'f', 2)));
     ui->perimeterEdit->setText(QString::number(p, 'f', 2));
 }
 
@@ -90,9 +119,10 @@ void Widget::calculatePolygonSides(){
 }
 
 //Расчёт площади многоульника
-double Widget::calculatePolygonSquare(){
+double Widget::calculatePolygonSquare(bool* crossed = nullptr){
     if(points.size() <= 1) return 0;
-
+    *crossed = hasCross(getVectorPoints());
+    //qDebug(*crossed ? "Has cross" : "Has no cross");
     double part1 = 0, part2 = 0;
     auto it = points.begin();
     auto end = --points.end();

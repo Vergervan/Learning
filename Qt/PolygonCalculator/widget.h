@@ -4,7 +4,9 @@
 #include <QWidget>
 #include <QListWidgetItem>
 #include <map>
+#include <vector>
 #include <math.h> //sqrt, pow
+
 #include "point.h"
 
 #define POINT_NAME "Точка "
@@ -23,7 +25,6 @@ public:
     double dabs(double x);
     double vectorMultiple(double x1, double y1, double x2, double y2);
     bool checkCross(Point p1, Point p2, Point p3, Point p4);
-    std::map<QListWidgetItem*, Point*>::iterator getByIndex(std::map<QListWidgetItem*, Point*>::iterator start, int index);
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
@@ -41,8 +42,9 @@ private slots:
 private:
     double calculatePerimeter();
     void calculatePolygonSides();
-    double calculatePolygonSquare();
-    bool hasCross();
+    double calculatePolygonSquare(bool*);
+    bool hasCross(std::vector<Point>);
+    std::vector<Point> getVectorPoints();
     void calculateAll();
     Ui::Widget *ui;
 };
