@@ -17,8 +17,8 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     setStyle(QApplication::style());
 
-    waitBox = new QDialog;
-    setupWaitBox();
+    //waitBox = new QDialog;
+    //setupWaitBox();
 }
 
 Widget::~Widget()
@@ -30,7 +30,7 @@ void Widget::resizeEvent(QResizeEvent*){
     updateTableHeaderSize();
 }
 
-void Widget::setupWaitBox(){
+/*void Widget::setupWaitBox(){
     QLabel* lbl = new QLabel(waitBox);
     lbl->setText("Sorting is in the process\nPlease wait...");
     lbl->setAlignment(Qt::AlignCenter);
@@ -38,7 +38,7 @@ void Widget::setupWaitBox(){
     lbl->setGeometry(0, 0, 200, 80);
     waitBox->setFixedSize(200, 80);
     waitBox->setWindowTitle("Message");
-}
+}*/
 
 /*void Widget::setupMessageBox(){
     waitBox = new QMessageBox(this);
@@ -140,7 +140,11 @@ bool Widget::checkErrors(){
     return false;
 }
 
-
+void Widget::swap(double* el1, double* el2){
+    double swp = *el2;
+    *el2 = *el1;
+    *el1 = swp;
+}
 
 void Widget::on_checkErrorButton_clicked()
 {
@@ -151,20 +155,21 @@ void Widget::on_sortButton_clicked()
 {
     if(arrLen < 1) return;
     if(checkErrors()) return;
-    waitBox->show();
     auto start = std::chrono::high_resolution_clock::now();
     switch(ui->sortCmb->currentIndex()){
     case Bubble:
         callBubbleSort();
+        break;
+    case Quick:
+        callQuickSort();
         break;
     case Comb:
 
         break;
     }
     auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);
-    ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " micro sec");
-    waitBox->hide();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms");
 }
 
 void Widget::fillTable(double* arr){
@@ -181,15 +186,12 @@ double* Widget::getTableArray(){
 
 void Widget::callBubbleSort(){
     double* nums = getTableArray();
-    double swp = 0;
     bool changed = true;
     while(changed){
         changed = false;
         for(int i = 0; i < arrLen-1;++i){
             if(nums[i] > nums[i+1]){
-                swp = nums[i+1];
-                nums[i+1] = nums[i];
-                nums[i] = swp;
+                swap(&nums[i], &nums[i+1]);
                 changed = true;
             }
         }
@@ -198,49 +200,40 @@ void Widget::callBubbleSort(){
     delete[] nums;
 }
 
-void Widget::callQuickSort(double* arr,int first,int last){
-    int pivot,i,j,temp;
-
-     if(first < last){
-         pivot = first;
-         i = first;
-         j = last;
-
-         while(i < j){
-             while(arr[i] <= arr[pivot] && i < last)
-                 i++;
-             while(arr[j] > arr[pivot])
-                 j--;
-             if(i <j){
-                  temp = arr[i];
-                  arr[i] = arr[j];
-                  arr[j] = temp;
-             }
-         }
-
-         temp = arr[pivot];
-         arr[pivot] = arr[j];
-         arr[j] = temp;
-         callQuickSort(arr,first,j-1);
-         callQuickSort(arr,j+1,last);
-         fillTable(arr);
-    }
+void Widget::callQuickSort(){
+    double* nums = getTableArray();
+    quickSort(nums, 0, arrLen-1);
+    fillTable(nums);
+    delete[] nums;
 }
 
-void Widget::quickSort(double* arr, int left, int right){
-    srand(time(NULL));
-    if(left >= right) return;
-    int pivot = (right + left)/2;
-    int i = left , j = right;
-    while(i < j){
-        while(arr[i] <= arr[pivot]) ++i;
-        while(arr[j] > arr[pivot]) --j;
-        if(i < j){
-            //swap(arr+i, arr+j);
+void Widget::quickSort(double* arr, int low, int high){
+    if (low >= high) return;
+    /* pi is partitioning index, arr[p] is now
+        at right place */
+    int pi = partition(arr, low, high);
+
+    // Separately sort elements before
+    // partition and after partition
+    quickSort(arr, low, pi - 1);
+    quickSort(arr, pi + 1, high);
+}
+
+int Widget::partition (double* arr, int low, int high)
+{
+    int pivot = arr[high]; // pivot
+    int i = (low - 1); // Index of smaller element and indicates the right position of pivot found so far
+    for (int j = low; j <= high - 1; j++)
+    {
+        // If current element is smaller than the pivot
+        if (arr[j] < pivot)
+        {
+            i++; // increment index of smaller element
+            swap(&arr[i], &arr[j]);
         }
     }
-    quickSort(arr, left, j-1);
-    quickSort(arr, i, right);
+    swap(&arr[i + 1], &arr[high]);
+    return (i + 1);
 }
 
 

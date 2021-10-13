@@ -30,9 +30,12 @@ public:
     void fillArrayZero();
     void fillTable(double*);
 
+    void swap(double*, double*);
+    int partition (double*, int, int);
+
     //Алгоритмы сортировки
     void callBubbleSort();
-    void callQuickSort(double*, int, int);
+    void callQuickSort();
 
 private slots:
     void on_createArrayButton_clicked();
@@ -47,7 +50,7 @@ private slots:
 
     void on_sortButton_clicked();
 private:
-    QDialog* waitBox;
+    //QDialog* waitBox;
     int arrLen = 0;
     void setWidgetProperty(QWidget*, const char*,const QVariant&);
     void setItemTextColor(QTableWidgetItem*, QColor);
@@ -56,7 +59,7 @@ private:
     void resizeEvent(QResizeEvent *event);
     void updateTableHeaderSize();
     //void setupMessageBox();
-    void setupWaitBox();
+    //void setupWaitBox();
     void quickSort(double*, int, int);
     double* getTableArray();
     Ui::Widget *ui;
