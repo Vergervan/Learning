@@ -97,12 +97,7 @@
      </item>
      <item>
       <property name="text">
-       <string>Болотная (Bogo)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Клоуна Бозо (Bozo)</string>
+       <string>Обезьянья (Bogo)</string>
       </property>
      </item>
     </widget>

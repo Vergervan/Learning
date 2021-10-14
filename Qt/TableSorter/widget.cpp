@@ -155,21 +155,32 @@ void Widget::on_sortButton_clicked()
 {
     if(arrLen < 1) return;
     if(checkErrors()) return;
+    ui->sortTimeLabel->setText("Sorting...");
+    double* nums = getTableArray();
     auto start = std::chrono::high_resolution_clock::now();
     switch(ui->sortCmb->currentIndex()){
     case Bubble:
-        callBubbleSort();
+        bubbleSort(nums);
         break;
     case Quick:
-        callQuickSort();
+        quickSort(nums, 0, arrLen-1);
         break;
     case Comb:
-
+        combSort(nums);
+        break;
+    case Gnome:
+        gnomeSort(nums);
+        break;
+    case Bogo:
+        bogoSort(nums);
         break;
     }
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
     ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms");
+
+    fillTable(nums);
+    delete[] nums;
 }
 
 void Widget::fillTable(double* arr){
@@ -184,27 +195,47 @@ double* Widget::getTableArray(){
     return numbers;
 }
 
-void Widget::callBubbleSort(){
-    double* nums = getTableArray();
+void Widget::bubbleSort(double* arr){
     bool changed = true;
     while(changed){
         changed = false;
         for(int i = 0; i < arrLen-1;++i){
-            if(nums[i] > nums[i+1]){
-                swap(&nums[i], &nums[i+1]);
+            if(arr[i] > arr[i+1]){
+                swap(&arr[i], &arr[i+1]);
                 changed = true;
             }
         }
     }
-    fillTable(nums);
-    delete[] nums;
 }
 
-void Widget::callQuickSort(){
-    double* nums = getTableArray();
-    quickSort(nums, 0, arrLen-1);
-    fillTable(nums);
-    delete[] nums;
+void Widget::combSort(double* arr){
+    double factor = 1.2473309; // фактор уменьшения
+    int step = arrLen - 1; // шаг сортировки
+    //Последняя итерация цикла, когда step==1 эквивалентна одному проходу сортировки пузырьком
+    while (step >= 1)
+    {
+        for (int i = 0; i + step < arrLen; i++)
+        {
+            if (arr[i] > arr[i + step])
+            {
+                swap(&arr[i], &arr[i+step]);
+            }
+        }
+        step /= factor;
+    }
+}
+
+void Widget::gnomeSort(double* arr){
+    int i = 1, j = 2;
+    while(i < arrLen){
+        if(arr[i - 1] < arr[i]) //Для разных направлений сортировки надо поменять знак на противоположный
+            i = j++;
+        else{
+            swap(&arr[i], &arr[i-1]);
+            --i;
+            if(i == 0) i = j++;
+        }
+    }
 }
 
 void Widget::quickSort(double* arr, int low, int high){
@@ -213,14 +244,12 @@ void Widget::quickSort(double* arr, int low, int high){
         at right place */
     int pi = partition(arr, low, high);
 
-    // Separately sort elements before
-    // partition and after partition
+    //Отдельно сортируются элементы до раздления и после
     quickSort(arr, low, pi - 1);
     quickSort(arr, pi + 1, high);
 }
 
-int Widget::partition (double* arr, int low, int high)
-{
+int Widget::partition(double* arr, int low, int high){
     int pivot = arr[high]; // pivot
     int i = (low - 1); // Index of smaller element and indicates the right position of pivot found so far
     for (int j = low; j <= high - 1; j++)
@@ -236,4 +265,20 @@ int Widget::partition (double* arr, int low, int high)
     return (i + 1);
 }
 
+bool Widget::correct(double* arr, int size) {
+    while (size-- > 0)
+        if (arr[size - 1] > arr[size])
+            return false;
+    return true;
+}
+
+void Widget::shuffle(double* arr) {
+    for (int i = 0; i < arrLen; ++i)
+        swap(&arr[i], &arr[(rand() % arrLen)]);
+}
+
+void Widget::bogoSort(double *arr) {
+    while (!correct(arr, arrLen))
+        shuffle(arr);
+}
 

@@ -14,7 +14,7 @@ namespace Ui { class Widget; }
 QT_END_NAMESPACE
 
 enum SortType{
-    Bubble, Quick, Comb, Gnome, Bogo, Bozo
+    Bubble, Quick, Comb, Gnome, Bogo
 };
 
 class Widget : public QWidget
@@ -32,11 +32,8 @@ public:
 
     void swap(double*, double*);
     int partition (double*, int, int);
-
-    //Алгоритмы сортировки
-    void callBubbleSort();
-    void callQuickSort();
-
+    bool correct(double*, int);
+    void shuffle(double*);
 private slots:
     void on_createArrayButton_clicked();
 
@@ -60,7 +57,14 @@ private:
     void updateTableHeaderSize();
     //void setupMessageBox();
     //void setupWaitBox();
+
+    //Алгоритмы сортировки
+    void bubbleSort(double*);
     void quickSort(double*, int, int);
+    void combSort(double*);
+    void gnomeSort(double*);
+    void bogoSort(double*);
+
     double* getTableArray();
     Ui::Widget *ui;
 };
