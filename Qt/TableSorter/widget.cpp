@@ -55,15 +55,23 @@ void Widget::updateTableHeaderSize(){
 
 void Widget::on_createArrayButton_clicked()
 {
-    isCreated = false;
+    int len = 0;
+    if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
+    arrLen = len;
     if(arrLen == 0) return;
+    createTable(arrLen);
+    fillArrayZero();
+}
+
+void Widget::createTable(int size){
+    isCreated = false;
     ui->dataTable->clear();
     ui->dataTable->setColumnCount(1);
-    ui->dataTable->setRowCount(arrLen);
+    ui->dataTable->setRowCount(size);
     ui->dataTable->setHorizontalHeaderLabels({"Значение"});
-    fillArrayZero();
-    updateTableHeaderSize();
+    for(int i = 0; i < size; i++) ui->dataTable->setItem(i, 0, new QTableWidgetItem);
     isCreated = true;
+    updateTableHeaderSize();
 }
 
 void Widget::setItemTextColor(QTableWidgetItem* item, QColor color){
@@ -78,13 +86,16 @@ void Widget::setWidgetProperty(QWidget* obj, const char* name,const QVariant& va
 
 void Widget::on_arrayCountEdit_textChanged(const QString &arg1)
 {
+    setWidgetProperty(ui->arrayCountEdit, "state", getArrayCount(QString(arg1.toStdString().c_str())) ? "" : "error");
+}
+
+///Returns false, if convertation to number failed
+bool Widget::getArrayCount(QString numstr, int* num){
     bool ok = true;
-    arrLen = arg1.toInt(&ok);
-    if(arrLen < MIN_ARRAY_SIZE || arrLen > MAX_ARRAY_SIZE){
-        ok = false;
-        arrLen = 0;
-    }
-    setWidgetProperty(ui->arrayCountEdit, "state", ok ? "" : "error");
+    int x = numstr.toInt(&ok);
+    if(x < MIN_ARRAY_SIZE || x > MAX_ARRAY_SIZE) ok = false;
+    if(num != nullptr) *num = x;
+    return ok;
 }
 
 void Widget::fillArrayRandom(){
@@ -99,11 +110,15 @@ void Widget::fillArrayRandom(){
 
 void Widget::fillArrayZero(){
     for(int i = 0; i < arrLen; i++)
-        ui->dataTable->setItem(i, 0, new QTableWidgetItem("0"));
+        ui->dataTable->item(i, 0)->setText("0");
 }
 
 void Widget::on_fillRandomButton_clicked()
 {
+    int len = 0;
+    if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
+    if(ui->dataTable->rowCount() != len) createTable(len);
+    arrLen = len;
     fillArrayRandom();
 }
 

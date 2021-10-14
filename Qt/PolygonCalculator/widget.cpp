@@ -105,7 +105,7 @@ double Widget::calculatePerimeter(){
     return p;
 }
 
-//Рассчитывает стороны всех сторон многоугольника
+//Рассчитывает стороны соединения всех вершин многоугольника
 void Widget::calculatePolygonSides(){
     if(points.size() <= 1) return;
     auto it = points.begin();

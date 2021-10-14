@@ -54,6 +54,8 @@ private:
     bool checkErrors();
     bool isCreated = false;
     void resizeEvent(QResizeEvent *event);
+    void createTable(int);
+    bool getArrayCount(QString, int* = nullptr);
     void updateTableHeaderSize();
     //void setupMessageBox();
     //void setupWaitBox();
