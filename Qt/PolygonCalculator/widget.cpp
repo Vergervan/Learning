@@ -165,6 +165,7 @@ void Widget::on_pointList_itemClicked(QListWidgetItem *item)
 
 void Widget::on_xEdit_textChanged(const QString &arg1)
 {
+    if(ui->pointList->selectedItems().count() < 1) return ui->xEdit->clear();
     bool ok = true;
     int x = arg1.toInt(&ok);
     points.at(ui->pointList->selectedItems()[0])->x = ok ? x : 0;
@@ -174,6 +175,7 @@ void Widget::on_xEdit_textChanged(const QString &arg1)
 
 void Widget::on_yEdit_textChanged(const QString &arg1)
 {
+    if(ui->pointList->selectedItems().count() < 1) return ui->yEdit->clear();
     bool ok = true;
     int x = arg1.toInt(&ok);
     points.at(ui->pointList->selectedItems()[0])->y = ok ? x : 0;
