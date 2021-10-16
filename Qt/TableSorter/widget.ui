@@ -7,24 +7,41 @@
     <x>0</x>
     <y>0</y>
     <width>392</width>
-    <height>370</height>
+    <height>507</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Array Sorter</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="8">
-    <widget class="QTableWidget" name="dataTable">
-     <property name="minimumSize">
-      <size>
-       <width>150</width>
-       <height>0</height>
-      </size>
+   <item row="6" column="2">
+    <widget class="QLabel" name="sortTimeLabel">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
+   <item row="13" column="2">
+    <widget class="QLabel" name="searchCountLabel">
+     <property name="font">
+      <font>
+       <pointsize>7</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
     <widget class="QLineEdit" name="arrayCountEdit">
      <property name="font">
       <font>
@@ -36,44 +53,48 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="createArrayButton">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Создать массив</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="fillRandomButton">
+   <item row="5" column="2">
+    <widget class="QPushButton" name="sortButton">
      <property name="font">
       <font>
        <pointsize>10</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Заполнить случайными 
-числами</string>
+      <string>Сортировать</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QPushButton" name="checkErrorButton">
+   <item row="8" column="2">
+    <widget class="QLabel" name="maxValueLabel">
      <property name="font">
       <font>
        <pointsize>10</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Проверка ошибок</string>
+      <string>TextLabel</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="9" column="2">
+    <widget class="QLabel" name="searchHeadLabel">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Поиск</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
     <widget class="QComboBox" name="sortCmb">
      <item>
       <property name="text">
@@ -102,34 +123,100 @@
      </item>
     </widget>
    </item>
-   <item row="5" column="1">
-    <widget class="QPushButton" name="sortButton">
+   <item row="7" column="2">
+    <widget class="QLabel" name="minValueLabel">
      <property name="font">
       <font>
        <pointsize>10</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Сортировать</string>
+      <string>TextLabel</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
-    <widget class="QLabel" name="sortTimeLabel">
+   <item row="3" column="2">
+    <widget class="QPushButton" name="checkErrorButton">
      <property name="font">
       <font>
        <pointsize>10</pointsize>
       </font>
      </property>
      <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <string>Проверка ошибок</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="11" column="2" rowspan="2">
+    <layout class="QHBoxLayout" name="searchButtonsLayout">
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="searchBackButton">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="searchForwardButton">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="fillRandomButton">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Заполнить случайными 
+числами</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="2">
+    <widget class="QLineEdit" name="searchEdit">
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="2">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -144,6 +231,37 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="createArrayButton">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Создать массив</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" rowspan="15">
+    <widget class="QTableWidget" name="dataTable">
+     <property name="minimumSize">
+      <size>
+       <width>150</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+    </widget>
    </item>
   </layout>
  </widget>

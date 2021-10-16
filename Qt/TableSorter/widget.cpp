@@ -8,7 +8,8 @@
 #define MIN_ARRAY_SIZE 1
 #define MAX_ARRAY_SIZE 100000
 
-#define RAND_NUM_BOUND 1000000 //Максимальная граница случайного числа
+//TODO
+//#define RAND_NUM_BOUND 1000000 // Максимальная граница случайного числа
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -19,17 +20,15 @@ Widget::Widget(QWidget *parent)
 
     //waitBox = new QDialog;
     //setupWaitBox();
+    refreshMaxAndMinValues();
+    setEnabledSearchButtons(false);
+    cur_index = s_indexes.end();
 }
 
 Widget::~Widget()
 {
     delete ui;
 }
-
-void Widget::resizeEvent(QResizeEvent*){
-    updateTableHeaderSize();
-}
-
 /*void Widget::setupWaitBox(){
     QLabel* lbl = new QLabel(waitBox);
     lbl->setText("Sorting is in the process\nPlease wait...");
@@ -48,9 +47,32 @@ void Widget::resizeEvent(QResizeEvent*){
     waitBox->setText("<p align='center'>Sorting is in process<br>Please wait...</p>");
 }*/
 
-void Widget::updateTableHeaderSize(){
+/*void Widget::updateTableHeaderSize(){
     double columnRatio = (double)(ui->dataTable->width()/30)-6.1; //Коэффициент изменения экрана
     ui->dataTable->setColumnWidth(0, ui->dataTable->width() - 30 + columnRatio); //Гибкая смена ширины заголовка таблицы в зависимости от размеров экрана
+}*/
+
+double Widget::getMinValue(double* arr, bool sorted){
+    if(arrLen < 1) return 0;
+    if(sorted) return arr[0];
+    double min = arr[0];
+    for(int i = 1; i < arrLen; i++)
+        if(arr[i] < min) min = arr[i];
+    return min;
+}
+
+double Widget::getMaxValue(double* arr, bool sorted){
+    if(arrLen < 1) return 0;
+    if(sorted) return arr[arrLen-1];
+    double max = arr[0];
+    for(int i = 1; i < arrLen; i++)
+        if(arr[i] > max) max = arr[i];
+    return max;
+}
+
+void Widget::refreshMaxAndMinValues(double* arr, bool sorted){
+    ui->minValueLabel->setText("Min: " + (arr == nullptr ? "0" : QString::number(getMinValue(arr, sorted))));
+    ui->maxValueLabel->setText("Max: " + (arr == nullptr ? "0" : QString::number(getMaxValue(arr, sorted))));
 }
 
 void Widget::on_createArrayButton_clicked()
@@ -71,7 +93,6 @@ void Widget::createTable(int size){
     ui->dataTable->setHorizontalHeaderLabels({"Значение"});
     for(int i = 0; i < size; i++) ui->dataTable->setItem(i, 0, new QTableWidgetItem);
     isCreated = true;
-    updateTableHeaderSize();
 }
 
 void Widget::setItemTextColor(QTableWidgetItem* item, QColor color){
@@ -120,6 +141,11 @@ void Widget::on_fillRandomButton_clicked()
     if(ui->dataTable->rowCount() != len) createTable(len);
     arrLen = len;
     fillArrayRandom();
+
+    double* nums = getTableArray();
+    refreshMaxAndMinValues(nums);
+    if(s_indexes.size() > 0) searchValue(this->key);
+    delete[] nums;
 }
 
 void Widget::on_dataTable_itemChanged(QTableWidgetItem *item)
@@ -172,7 +198,7 @@ void Widget::on_sortButton_clicked()
     if(checkErrors()) return;
     ui->sortTimeLabel->setText("Sorting...");
     double* nums = getTableArray();
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now(); //Время начала выполнения сортировки
     switch(ui->sortCmb->currentIndex()){
     case Bubble:
         bubbleSort(nums);
@@ -190,12 +216,14 @@ void Widget::on_sortButton_clicked()
         bogoSort(nums);
         break;
     }
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
-    ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms");
+    auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start); //Расчёт временнго промежутка
+    ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms"); //Вывод затраченного времени на экран
 
+    refreshMaxAndMinValues(nums, true);
     fillTable(nums);
     delete[] nums;
+    searchValue(this->key);
 }
 
 void Widget::fillTable(double* arr){
@@ -289,11 +317,105 @@ bool Widget::correct(double* arr, int size) {
 
 void Widget::shuffle(double* arr) {
     for (int i = 0; i < arrLen; ++i)
-        swap(&arr[i], &arr[(rand() % arrLen)]);
+        swap(&arr[i], &arr[rand() % arrLen]);
 }
 
 void Widget::bogoSort(double *arr) {
     while (!correct(arr, arrLen))
         shuffle(arr);
+}
+
+void Widget::setEnabledSearchButtons(bool b){
+    ui->searchBackButton->setEnabled(b);
+    ui->searchForwardButton->setEnabled(b);
+}
+
+void Widget::searchValue(double key){
+    double* nums = getTableArray();
+    s_indexes.clear();
+    if(correct(nums, arrLen)){
+        binarySearch(&s_indexes, nums, key);
+        qDebug("Binary search");
+    }
+    else{
+        linearSearch(&s_indexes, nums, key);
+        qDebug("Linear search");
+    }
+    setEnabledSearchButtons(s_indexes.size() < 1 ? false : true);
+    ui->searchCountLabel->setText("Найдено: " + QString::number(s_indexes.size()));
+    cur_index = s_indexes.begin();
+    if(s_indexes.size() > 0) chooseItem(*cur_index);
+
+    delete[] nums;
+}
+
+void Widget::chooseItem(int index){
+    ui->dataTable->clearSelection();
+    auto item = ui->dataTable->item(index, 0);
+    item->setSelected(true);
+    ui->dataTable->scrollToItem(item);
+}
+
+void Widget::binarySearch(std::vector<int>* indexes, double* arr,double key){
+    int left = 0;
+    int right = arrLen;
+    int mid = 0;
+    while(left < right){
+        mid = (left+right)/2;
+        if(arr[mid] == key) return indexes->push_back(mid);
+        else if(arr[mid] < key) right = mid-1;
+        else if(arr[mid] > key) left = mid+1;
+    }
+}
+
+void Widget::linearSearch(std::vector<int>* indexes, double* arr,double key){
+    for(int i = 0; i < arrLen; i++)
+        if(arr[i] == key) indexes->push_back(i);
+}
+
+std::vector<int>::iterator Widget::incIndex(){
+    ++cur_index;
+    if(cur_index == s_indexes.end()) cur_index = s_indexes.begin();
+    return cur_index;
+}
+std::vector<int>::iterator Widget::decIndex(){
+    if(cur_index == s_indexes.begin()) {
+        cur_index = --s_indexes.end();
+        return cur_index;
+    }
+    --cur_index;
+    return cur_index;
+}
+
+
+void Widget::on_searchBackButton_clicked()
+{
+    if(s_indexes.size() == 1) return chooseItem(*cur_index);
+    chooseItem(*decIndex());
+}
+
+
+void Widget::on_searchForwardButton_clicked()
+{
+    if(s_indexes.size() == 1) return chooseItem(*cur_index);
+    chooseItem(*incIndex());
+}
+
+
+void Widget::on_searchEdit_returnPressed()
+{
+    if(ui->searchEdit->text().isEmpty()) return;
+    bool ok = true;
+    this->key = ui->searchEdit->text().toDouble(&ok);
+    if(!ok) return;
+    searchValue(this->key);
+}
+
+
+void Widget::on_searchEdit_textChanged(const QString&)
+{
+    bool ok = true;
+    ui->searchEdit->text().toDouble(&ok);
+    setWidgetProperty(ui->searchEdit, "state", ok ? "" : "error");
 }
 
