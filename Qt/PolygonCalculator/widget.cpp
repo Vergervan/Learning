@@ -28,8 +28,7 @@ void Widget::addPoint(){
 
 //Расчёт модуля для вещественного числа
 double Widget::dabs(double x){
-    if(x >= 0) return x;
-    return -1 * x;
+    return (x >= 0 ? x : -1 * x);
 }
 
 std::vector<Point> Widget::getVectorPoints(){
@@ -129,7 +128,7 @@ double Widget::calculatePolygonSquare(bool* crossed = nullptr){
     part1 += end->second->x * it->second->y;
     part2 += end->second->y * it->second->x;
     while(it != end){
-        int x1 = it->second->x, y1 = it->second->y;
+        double x1 = it->second->x, y1 = it->second->y;
         ++it;
         part1+=x1*it->second->y;
         part2+=y1*it->second->x;
@@ -171,22 +170,34 @@ void Widget::clearFields(){
     ui->squareEdit->clear();
 }
 
-void Widget::on_xEdit_textChanged(const QString &arg1)
+void Widget::on_xEdit_textChanged(const QString &)
 {
     if(ui->pointList->selectedItems().count() < 1) return ui->xEdit->clear();
+}
+
+
+void Widget::on_yEdit_textChanged(const QString &)
+{
+    if(ui->pointList->selectedItems().count() < 1) return ui->yEdit->clear();
+}
+
+
+void Widget::on_xEdit_returnPressed()
+{
     bool ok = true;
-    int x = arg1.toInt(&ok);
+    double x = ui->xEdit->text().toDouble(&ok);
     points.at(ui->pointList->selectedItems()[0])->x = ok ? x : 0;
+    if(!ok && ui->xEdit->text() != "") ui->xEdit->setText("0");
     calculateAll();
 }
 
 
-void Widget::on_yEdit_textChanged(const QString &arg1)
+void Widget::on_yEdit_returnPressed()
 {
-    if(ui->pointList->selectedItems().count() < 1) return ui->yEdit->clear();
     bool ok = true;
-    int x = arg1.toInt(&ok);
-    points.at(ui->pointList->selectedItems()[0])->y = ok ? x : 0;
+    double y = ui->yEdit->text().toDouble(&ok);
+    points.at(ui->pointList->selectedItems()[0])->y = ok ? y : 0;
+    if(!ok && ui->yEdit->text() != "") ui->yEdit->setText("0");
     calculateAll();
 }
 

@@ -2,7 +2,7 @@
 #define POINT_H
 
 struct Point{
-    int x = 0, y = 0;
+    double x = 0, y = 0;
     double side = 0;
 };
 

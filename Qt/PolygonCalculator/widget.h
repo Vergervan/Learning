@@ -39,6 +39,10 @@ private slots:
 
     void on_yEdit_textChanged(const QString &arg1);
 
+    void on_xEdit_returnPressed();
+
+    void on_yEdit_returnPressed();
+
 private:
     double calculatePerimeter();
     void calculatePolygonSides();
