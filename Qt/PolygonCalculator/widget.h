@@ -46,6 +46,7 @@ private:
     bool hasCross(std::vector<Point>);
     std::vector<Point> getVectorPoints();
     void calculateAll();
+    void clearFields();
     Ui::Widget *ui;
 };
 #endif // WIDGET_H

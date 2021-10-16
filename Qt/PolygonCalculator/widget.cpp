@@ -151,6 +151,7 @@ void Widget::on_removePointButton_clicked()
     QListWidgetItem* item = ui->pointList->item(ui->pointList->count()-1);
     points.erase(item);
     delete item;
+    if(ui->pointList->count() < 1) return clearFields();
     calculateAll();
 }
 
@@ -162,6 +163,13 @@ void Widget::on_pointList_itemClicked(QListWidgetItem *item)
     ui->sideEdit->setText(QString::number(points.at(item)->side, 'f', 2));
 }
 
+void Widget::clearFields(){
+    ui->xEdit->clear();
+    ui->yEdit->clear();
+    ui->sideEdit->clear();
+    ui->perimeterEdit->clear();
+    ui->squareEdit->clear();
+}
 
 void Widget::on_xEdit_textChanged(const QString &arg1)
 {
