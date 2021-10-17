@@ -17,9 +17,10 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
     setStyle(QApplication::style());
-
     //waitBox = new QDialog;
     //setupWaitBox();
+    setupDublicateBox();
+
     refreshMaxAndMinValues();
     setEnabledSearchButtons(false);
     cur_index = s_indexes.end();
@@ -29,6 +30,12 @@ Widget::~Widget()
 {
     delete ui;
 }
+void Widget::setupDublicateBox(){
+    dublicateBox.setWindowTitle("Message");
+    dublicateBox.setText("Отсортируйте список перед удалением дубликатов");
+    dublicateBox.setStandardButtons(QMessageBox::Ok);
+}
+
 /*void Widget::setupWaitBox(){
     QLabel* lbl = new QLabel(waitBox);
     lbl->setText("Sorting is in the process\nPlease wait...");
@@ -42,7 +49,7 @@ Widget::~Widget()
 /*void Widget::setupMessageBox(){
     waitBox = new QMessageBox(this);
     waitBox->setWindowTitle("Message");
-    waitBox->setStyleSheet("width: 150px;");
+    waitBox->setStyleSheet("width: 150px;");7
     waitBox->setStandardButtons((QMessageBox::StandardButton)0);
     waitBox->setText("<p align='center'>Sorting is in process<br>Please wait...</p>");
 }*/
@@ -77,12 +84,16 @@ void Widget::refreshMaxAndMinValues(double* arr, bool sorted){
 
 void Widget::on_createArrayButton_clicked()
 {
+    this->cur_state = Create;
     int len = 0;
     if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
     arrLen = len;
     if(arrLen == 0) return;
     createTable(arrLen);
     fillArrayZero();
+    ui->searchEdit->clear();
+    ui->searchCountLabel->clear();
+    this->cur_state = None;
 }
 
 void Widget::createTable(int size){
@@ -136,6 +147,7 @@ void Widget::fillArrayZero(){
 
 void Widget::on_fillRandomButton_clicked()
 {
+    this->cur_state = Randomize;
     int len = 0;
     if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
     if(ui->dataTable->rowCount() != len) createTable(len);
@@ -143,14 +155,18 @@ void Widget::on_fillRandomButton_clicked()
     fillArrayRandom();
 
     double* nums = getTableArray();
-    refreshMaxAndMinValues(nums);
-    if(s_indexes.size() > 0) searchValue(this->key);
+    callMaxAndMin(Randomize, nums);
+    ui->searchEdit->clear();
+    ui->searchCountLabel->clear();
+
     delete[] nums;
+    this->cur_state = None;
 }
 
 void Widget::on_dataTable_itemChanged(QTableWidgetItem *item)
 {
-    if(!isCreated) return;
+    if(!isCreated || this->cur_state != None) return;
+    this->cur_state = ItemChange;
     bool ok = true;
     item->text().toDouble(&ok);
     setItemTextColor(item, ok ? Qt::black : Qt::red);
@@ -158,9 +174,20 @@ void Widget::on_dataTable_itemChanged(QTableWidgetItem *item)
         ui->dataTable->scrollToItem(item);
         item->setSelected(true);
     }
+    callMaxAndMin(ItemChange);
+    this->cur_state = None;
+    qDebug("Item changed");
+}
+
+void Widget::callMaxAndMin(State st, double* arr){
+    if(this->cur_state != st) return;
+    double* nums = (arr == nullptr ? getTableArray() : arr);
+    refreshMaxAndMinValues(nums, st == Sort ? true : false);
+    if(arr == nullptr) delete[] nums;
 }
 
 bool Widget::checkErrors(){
+    this->cur_state = ErrorCheck;
     QTableWidgetItem* firstErr = nullptr;
     bool ok = true;
     for(int i = 0; i < arrLen; i++){
@@ -176,9 +203,11 @@ bool Widget::checkErrors(){
         ui->dataTable->scrollToItem(firstErr);
         firstErr->setSelected(true);
         ui->dataTable->setFocus();
+        this->cur_state = None;
         return true;
     }
     return false;
+    this->cur_state = None;
 }
 
 void Widget::swap(double* el1, double* el2){
@@ -196,34 +225,38 @@ void Widget::on_sortButton_clicked()
 {
     if(arrLen < 1) return;
     if(checkErrors()) return;
+    this->cur_state = Sort;
     ui->sortTimeLabel->setText("Sorting...");
     double* nums = getTableArray();
     auto start = std::chrono::high_resolution_clock::now(); //Время начала выполнения сортировки
     switch(ui->sortCmb->currentIndex()){
-    case Bubble:
-        bubbleSort(nums);
-        break;
-    case Quick:
-        quickSort(nums, 0, arrLen-1);
-        break;
-    case Comb:
-        combSort(nums);
-        break;
-    case Gnome:
-        gnomeSort(nums);
-        break;
-    case Bogo:
-        bogoSort(nums);
-        break;
+        case Bubble:
+            bubbleSort(nums);
+            break;
+        case Quick:
+            quickSort(nums, 0, arrLen-1);
+            break;
+        case Comb:
+            combSort(nums);
+            break;
+        case Gnome:
+            gnomeSort(nums);
+            break;
+        case Bogo:
+            bogoSort(nums);
+            break;
     }
+    correct(nums, arrLen);
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start); //Расчёт временнго промежутка
     ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms"); //Вывод затраченного времени на экран
 
-    refreshMaxAndMinValues(nums, true);
+    callMaxAndMin(Sort, nums);
+    callSearchValue(nums);
+
     fillTable(nums);
     delete[] nums;
-    searchValue(this->key);
+    this->cur_state = None;
 }
 
 void Widget::fillTable(double* arr){
@@ -309,9 +342,12 @@ int Widget::partition(double* arr, int low, int high){
 }
 
 bool Widget::correct(double* arr, int size) {
-    while (size-- > 0)
-        if (arr[size - 1] > arr[size])
+    while (size-- > 0){
+        if (arr[size - 1] > arr[size]){
+            qDebug(QString("Not sorted, false at: " + QString::number(size)).toStdString().c_str());
             return false;
+        }
+    }
     return true;
 }
 
@@ -330,9 +366,10 @@ void Widget::setEnabledSearchButtons(bool b){
     ui->searchForwardButton->setEnabled(b);
 }
 
-void Widget::searchValue(double key){
-    double* nums = getTableArray();
+void Widget::searchValue(double key, double* arr){
+    double* nums = (arr == nullptr ? getTableArray() : arr);
     s_indexes.clear();
+    cur_index = s_indexes.end();
     if(correct(nums, arrLen)){
         binarySearch(&s_indexes, nums, key);
         qDebug("Binary search");
@@ -343,10 +380,12 @@ void Widget::searchValue(double key){
     }
     setEnabledSearchButtons(s_indexes.size() < 1 ? false : true);
     ui->searchCountLabel->setText("Найдено: " + QString::number(s_indexes.size()));
-    cur_index = s_indexes.begin();
-    if(s_indexes.size() > 0) chooseItem(*cur_index);
+    if(s_indexes.size() > 0) {
+        cur_index = s_indexes.begin();
+        chooseItem(*cur_index);
+    }
 
-    delete[] nums;
+    if(arr == nullptr) delete[] nums;
 }
 
 void Widget::chooseItem(int index){
@@ -360,11 +399,12 @@ void Widget::binarySearch(std::vector<int>* indexes, double* arr,double key){
     int left = 0;
     int right = arrLen;
     int mid = 0;
-    while(left < right){
+    while(true){
         mid = (left+right)/2;
         if(arr[mid] == key) return indexes->push_back(mid);
-        else if(arr[mid] < key) right = mid-1;
-        else if(arr[mid] > key) left = mid+1;
+        else if(arr[mid] > key) right = mid-1;
+        else if(arr[mid] < key) left = mid+1;
+        if(mid == 0) return;
     }
 }
 
@@ -394,28 +434,68 @@ void Widget::on_searchBackButton_clicked()
     chooseItem(*decIndex());
 }
 
-
 void Widget::on_searchForwardButton_clicked()
 {
     if(s_indexes.size() == 1) return chooseItem(*cur_index);
     chooseItem(*incIndex());
 }
 
-
 void Widget::on_searchEdit_returnPressed()
 {
-    if(ui->searchEdit->text().isEmpty()) return;
-    bool ok = true;
-    this->key = ui->searchEdit->text().toDouble(&ok);
-    if(!ok) return;
-    searchValue(this->key);
+    callSearchValue();
 }
 
+void Widget::callSearchValue(double* arr){
+    ui->searchCountLabel->clear();
+    if(ui->searchEdit->text().isEmpty()) return;
+    bool ok = true;
+    double key = ui->searchEdit->text().toDouble(&ok);
+    if(!ok) return;
+    searchValue(key, arr);
+}
 
-void Widget::on_searchEdit_textChanged(const QString&)
+void Widget::on_searchEdit_textChanged(const QString &arg1)
 {
+    if(arg1.isEmpty()){
+        ui->searchCountLabel->clear();
+        return setEnabledSearchButtons(false);
+    }
     bool ok = true;
     ui->searchEdit->text().toDouble(&ok);
     setWidgetProperty(ui->searchEdit, "state", ok ? "" : "error");
 }
 
+void Widget::on_removeDublicatesButton_clicked()
+{
+    this->cur_state = Remove;
+    if(arrLen <= 0) return;
+    double* nums = getTableArray();
+    if(!correct(nums, arrLen)) {
+        dublicateBox.show();
+        return;
+    }
+    removeDublicates(&nums);
+    ui->dataTable->setRowCount(arrLen);
+    callSearchValue(nums);
+    fillTable(nums);
+    delete[] nums;
+    this->cur_state = None;
+}
+
+void Widget::removeDublicates(double** p_arr){
+    std::vector<double> numVec;
+    double num = (*p_arr)[0];
+    for(int i = 1; i <= arrLen; i++){
+        if((*p_arr)[i] != num) {
+            numVec.push_back(num);
+            num = (*p_arr)[i];
+        }
+    }
+    qDebug(QString::number(numVec.size()).toStdString().c_str());
+    double* newArr = new double[numVec.size()];
+    for(unsigned int i = 0; i < numVec.size(); i++)
+        newArr[i] = numVec.at(i);
+    delete[] *p_arr;
+    *p_arr = newArr;
+    arrLen = numVec.size();
+}

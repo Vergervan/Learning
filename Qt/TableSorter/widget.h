@@ -6,6 +6,8 @@
 #include <QRandomGenerator>
 #include <QMessageBox>
 #include <QDialog>
+#include <QKeyEvent>
+
 #include <chrono>
 #include <time.h>
 
@@ -15,6 +17,10 @@ QT_END_NAMESPACE
 
 enum SortType{
     Bubble, Quick, Comb, Gnome, Bogo
+};
+
+enum State{
+    None, Create, Randomize, Sort, ItemChange, ErrorCheck, Remove
 };
 
 class Widget : public QWidget
@@ -55,10 +61,13 @@ private slots:
 
     void on_searchEdit_textChanged(const QString &arg1);
 
+    void on_removeDublicatesButton_clicked();
+
 private:
     //QDialog* waitBox;
+    QMessageBox dublicateBox;
+    State cur_state = None;
     int arrLen = 0;
-    double key = 0;
     std::vector<int> s_indexes;
     std::vector<int>::iterator cur_index;
     void setWidgetProperty(QWidget*, const char*,const QVariant&);
@@ -71,6 +80,7 @@ private:
     void updateTableHeaderSize();
     //void setupMessageBox();
     //void setupWaitBox();
+    void setupDublicateBox();
 
     //Алгоритмы сортировки
     void bubbleSort(double*);
@@ -82,10 +92,14 @@ private:
     double getMinValue(double*, bool = false);
     double getMaxValue(double*, bool = false);
     void refreshMaxAndMinValues(double* = nullptr, bool = false);
+    void callMaxAndMin(State, double* = nullptr);
 
-    void searchValue(double);
+    void callSearchValue(double* = nullptr);
+    void searchValue(double, double* = nullptr);
     void binarySearch(std::vector<int>*, double*,double);
     void linearSearch(std::vector<int>*, double*,double);
+
+    void removeDublicates(double**);
 
     void chooseItem(int index);
     std::vector<int>::iterator incIndex();
