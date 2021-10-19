@@ -81,10 +81,14 @@ void Widget::on_createArrayButton_clicked()
 void Widget::on_fillRandomButton_clicked()
 {
     this->cur_state = Randomize;
-    int len = 0;
-    if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
-    if(ui->dataTable->rowCount() != len) createTable(len);
-    arrLen = len;
+    if(!isCreated) {
+        int len = 0;
+        if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
+        createTable(len);
+        arrLen = len;
+    }
+    else ui->dataTable->setRowCount(arrLen);
+    //if(ui->dataTable->rowCount() != len) createTable(len);
     fillArrayRandom();
 
     double* nums = getTableArray();
