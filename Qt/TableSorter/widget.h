@@ -77,7 +77,8 @@ private:
     bool isCreated = false;
     void createTable(int);
     bool getArrayCount(QString, int* = nullptr);
-    void updateTableHeaderSize();
+    //void updateTableHeaderSize(); Deprecated
+
     //void setupMessageBox();
     //void setupWaitBox();
     void setupDublicateBox();

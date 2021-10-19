@@ -16,20 +16,21 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    setStyle(QApplication::style());
-    //waitBox = new QDialog;
-    //setupWaitBox();
-    setupDublicateBox();
+    setStyle(QApplication::style()); //Установка стиля на этот Widget
 
-    refreshMaxAndMinValues();
+    setupDublicateBox(); //Установка параметров MessageBox'а для кнопки удаления дубликатов
+
+    refreshMaxAndMinValues(); //Стартовое обновление максимальных и минимальных значений
     setEnabledSearchButtons(false);
-    cur_index = s_indexes.end();
 }
 
 Widget::~Widget()
 {
     delete ui;
 }
+
+//Функции установки стартовых параметров
+
 void Widget::setupDublicateBox(){
     dublicateBox.setWindowTitle("Message");
     dublicateBox.setText("Отсортируйте список перед удалением дубликатов");
@@ -59,28 +60,9 @@ void Widget::setupDublicateBox(){
     ui->dataTable->setColumnWidth(0, ui->dataTable->width() - 30 + columnRatio); //Гибкая смена ширины заголовка таблицы в зависимости от размеров экрана
 }*/
 
-double Widget::getMinValue(double* arr, bool sorted){
-    if(arrLen < 1) return 0;
-    if(sorted) return arr[0];
-    double min = arr[0];
-    for(int i = 1; i < arrLen; i++)
-        if(arr[i] < min) min = arr[i];
-    return min;
-}
+//ФУНКЦИИ СОБЫТИЙ
 
-double Widget::getMaxValue(double* arr, bool sorted){
-    if(arrLen < 1) return 0;
-    if(sorted) return arr[arrLen-1];
-    double max = arr[0];
-    for(int i = 1; i < arrLen; i++)
-        if(arr[i] > max) max = arr[i];
-    return max;
-}
-
-void Widget::refreshMaxAndMinValues(double* arr, bool sorted){
-    ui->minValueLabel->setText("Min: " + (arr == nullptr ? "0" : QString::number(getMinValue(arr, sorted))));
-    ui->maxValueLabel->setText("Max: " + (arr == nullptr ? "0" : QString::number(getMaxValue(arr, sorted))));
-}
+//Обработка кликов и нажатий
 
 void Widget::on_createArrayButton_clicked()
 {
@@ -94,55 +76,6 @@ void Widget::on_createArrayButton_clicked()
     ui->searchEdit->clear();
     ui->searchCountLabel->clear();
     this->cur_state = None;
-}
-
-void Widget::createTable(int size){
-    isCreated = false;
-    ui->dataTable->clear();
-    ui->dataTable->setColumnCount(1);
-    ui->dataTable->setRowCount(size);
-    ui->dataTable->setHorizontalHeaderLabels({"Значение"});
-    for(int i = 0; i < size; i++) ui->dataTable->setItem(i, 0, new QTableWidgetItem);
-    isCreated = true;
-}
-
-void Widget::setItemTextColor(QTableWidgetItem* item, QColor color){
-    item->setForeground(QBrush(color));
-}
-
-void Widget::setWidgetProperty(QWidget* obj, const char* name,const QVariant& value){
-        obj->setProperty(name, value);
-        obj->style()->unpolish(obj);
-        obj->style()->polish(obj);
-}
-
-void Widget::on_arrayCountEdit_textChanged(const QString &arg1)
-{
-    setWidgetProperty(ui->arrayCountEdit, "state", getArrayCount(QString(arg1.toStdString().c_str())) ? "" : "error");
-}
-
-///Returns false, if convertation to number failed
-bool Widget::getArrayCount(QString numstr, int* num){
-    bool ok = true;
-    int x = numstr.toInt(&ok);
-    if(x < MIN_ARRAY_SIZE || x > MAX_ARRAY_SIZE) ok = false;
-    if(num != nullptr) *num = x;
-    return ok;
-}
-
-void Widget::fillArrayRandom(){
-    ui->dataTable->clearSelection();
-    srand(time(NULL));
-    int x = 0;
-    for(int i = 0; i < arrLen; i++){
-        x = rand();
-        ui->dataTable->item(i, 0)->setText(QString::number(x));
-    }
-}
-
-void Widget::fillArrayZero(){
-    for(int i = 0; i < arrLen; i++)
-        ui->dataTable->item(i, 0)->setText("0");
 }
 
 void Widget::on_fillRandomButton_clicked()
@@ -161,59 +94,6 @@ void Widget::on_fillRandomButton_clicked()
 
     delete[] nums;
     this->cur_state = None;
-}
-
-void Widget::on_dataTable_itemChanged(QTableWidgetItem *item)
-{
-    if(!isCreated || this->cur_state != None) return;
-    this->cur_state = ItemChange;
-    bool ok = true;
-    item->text().toDouble(&ok);
-    setItemTextColor(item, ok ? Qt::black : Qt::red);
-    if(!ok){
-        ui->dataTable->scrollToItem(item);
-        item->setSelected(true);
-    }
-    callMaxAndMin(ItemChange);
-    this->cur_state = None;
-    qDebug("Item changed");
-}
-
-void Widget::callMaxAndMin(State st, double* arr){
-    if(this->cur_state != st) return;
-    double* nums = (arr == nullptr ? getTableArray() : arr);
-    refreshMaxAndMinValues(nums, st == Sort ? true : false);
-    if(arr == nullptr) delete[] nums;
-}
-
-bool Widget::checkErrors(){
-    this->cur_state = ErrorCheck;
-    QTableWidgetItem* firstErr = nullptr;
-    bool ok = true;
-    for(int i = 0; i < arrLen; i++){
-        ui->dataTable->item(i, 0)->text().toDouble(&ok);
-        if(!ok) {
-            if(firstErr == nullptr) firstErr = ui->dataTable->item(i, 0);
-        }
-        setItemTextColor(ui->dataTable->item(i, 0), ok ? Qt::black : Qt::red);
-    }
-    if(firstErr != nullptr) {
-        ui->dataTable->clearSelection();
-        ui->dataTable->clearFocus();
-        ui->dataTable->scrollToItem(firstErr);
-        firstErr->setSelected(true);
-        ui->dataTable->setFocus();
-        this->cur_state = None;
-        return true;
-    }
-    return false;
-    this->cur_state = None;
-}
-
-void Widget::swap(double* el1, double* el2){
-    double swp = *el2;
-    *el2 = *el1;
-    *el1 = swp;
 }
 
 void Widget::on_checkErrorButton_clicked()
@@ -246,7 +126,7 @@ void Widget::on_sortButton_clicked()
             bogoSort(nums);
             break;
     }
-    correct(nums, arrLen);
+    correct(nums, ui->dataTable->rowCount());
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start); //Расчёт временнго промежутка
     ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms"); //Вывод затраченного времени на экран
@@ -257,6 +137,121 @@ void Widget::on_sortButton_clicked()
     fillTable(nums);
     delete[] nums;
     this->cur_state = None;
+}
+
+void Widget::on_searchBackButton_clicked()
+{
+    if(s_indexes.size() == 1) return chooseItem(*cur_index);
+    chooseItem(*decIndex());
+}
+
+void Widget::on_searchForwardButton_clicked()
+{
+    if(s_indexes.size() == 1) return chooseItem(*cur_index);
+    chooseItem(*incIndex());
+}
+
+void Widget::on_removeDublicatesButton_clicked()
+{
+    this->cur_state = Remove;
+    if(arrLen <= 0) return;
+    double* nums = getTableArray();
+    if(!correct(nums, arrLen)) {
+        dublicateBox.show();
+        return;
+    }
+    removeDublicates(&nums);
+    ui->dataTable->setRowCount(arrLen);
+    callSearchValue(nums);
+    fillTable(nums);
+    delete[] nums;
+    this->cur_state = None;
+}
+
+void Widget::on_searchEdit_returnPressed()
+{
+    callSearchValue();
+}
+
+//Обработка изменений
+
+void Widget::on_arrayCountEdit_textChanged(const QString &arg1)
+{
+    setWidgetProperty(ui->arrayCountEdit, "state", getArrayCount(QString(arg1.toStdString().c_str())) ? "" : "error");
+}
+
+void Widget::on_dataTable_itemChanged(QTableWidgetItem *item)
+{
+    if(!isCreated || this->cur_state != None) return;
+    this->cur_state = ItemChange;
+    bool ok = true;
+    item->text().toDouble(&ok);
+    setItemTextColor(item, ok ? Qt::black : Qt::red);
+    if(!ok){
+        ui->dataTable->scrollToItem(item);
+        item->setSelected(true);
+    }
+    callMaxAndMin(ItemChange);
+    this->cur_state = None;
+    qDebug("Item changed");
+}
+
+void Widget::on_searchEdit_textChanged(const QString &arg1)
+{
+    if(arg1.isEmpty()){
+        ui->searchCountLabel->clear();
+        return setEnabledSearchButtons(false);
+    }
+    bool ok = true;
+    ui->searchEdit->text().toDouble(&ok);
+    setWidgetProperty(ui->searchEdit, "state", ok ? "" : "error");
+}
+
+//Функции работы с UI
+
+void Widget::setItemTextColor(QTableWidgetItem* item, QColor color){
+    item->setForeground(QBrush(color));
+}
+
+void Widget::setWidgetProperty(QWidget* obj, const char* name,const QVariant& value){
+    obj->setProperty(name, value);
+    obj->style()->unpolish(obj);
+    obj->style()->polish(obj);
+}
+
+void Widget::setEnabledSearchButtons(bool b){
+    ui->searchBackButton->setEnabled(b);
+    ui->searchForwardButton->setEnabled(b);
+}
+
+void Widget::refreshMaxAndMinValues(double* arr, bool sorted){
+    ui->minValueLabel->setText("Min: " + (arr == nullptr ? "0" : QString::number(getMinValue(arr, sorted))));
+    ui->maxValueLabel->setText("Max: " + (arr == nullptr ? "0" : QString::number(getMaxValue(arr, sorted))));
+}
+
+void Widget::createTable(int size){
+    isCreated = false;
+    ui->dataTable->clear();
+    ui->dataTable->setColumnCount(1);
+    ui->dataTable->setRowCount(size);
+    ui->dataTable->setHorizontalHeaderLabels({"Значение"});
+    for(int i = 0; i < size; i++) ui->dataTable->setItem(i, 0, new QTableWidgetItem);
+    isCreated = true;
+}
+
+void Widget::fillArrayRandom(){
+    ui->dataTable->clearSelection();
+    srand(time(NULL));
+    int x = 0;
+    for(int i = 0; i < ui->dataTable->rowCount(); i++){
+        x = rand();
+        ui->dataTable->item(i, 0)->setText(QString::number(x));
+    }
+}
+
+void Widget::fillArrayZero(){
+    for(int i = 0; i < arrLen; i++)
+        ui->dataTable->item(i, 0)->setText("0");
 }
 
 void Widget::fillTable(double* arr){
@@ -270,6 +265,32 @@ double* Widget::getTableArray(){
     for(int i = 0; i < arrLen; i++) numbers[i] = ui->dataTable->item(i, 0)->text().toDouble();
     return numbers;
 }
+
+bool Widget::checkErrors(){
+    this->cur_state = ErrorCheck;
+    QTableWidgetItem* firstErr = nullptr;
+    bool ok = true;
+    for(int i = 0; i < arrLen; i++){
+        ui->dataTable->item(i, 0)->text().toDouble(&ok);
+        if(!ok) {
+            if(firstErr == nullptr) firstErr = ui->dataTable->item(i, 0);
+        }
+        setItemTextColor(ui->dataTable->item(i, 0), ok ? Qt::black : Qt::red);
+    }
+    if(firstErr != nullptr) {
+        ui->dataTable->clearSelection();
+        ui->dataTable->clearFocus();
+        ui->dataTable->scrollToItem(firstErr);
+        firstErr->setSelected(true);
+        ui->dataTable->setFocus();
+        this->cur_state = None;
+        return true;
+    }
+    return false;
+    this->cur_state = None;
+}
+
+//Функции сортировки
 
 void Widget::bubbleSort(double* arr){
     bool changed = true;
@@ -286,18 +307,25 @@ void Widget::bubbleSort(double* arr){
 
 void Widget::combSort(double* arr){
     double factor = 1.2473309; // фактор уменьшения
-    int step = arrLen - 1; // шаг сортировки
-    //Последняя итерация цикла, когда step==1 эквивалентна одному проходу сортировки пузырьком
-    while (step >= 1)
+    int step = arrLen; // шаг сортировки
+    bool swapped = true;
+
+    while (step != 1 || swapped)
     {
-        for (int i = 0; i + step < arrLen; i++)
+        step = int(step/factor);
+        if(step < 1) step = 1;
+
+        swapped = false;
+
+        for (int i = 0; i < arrLen-step; i++)
         {
             if (arr[i] > arr[i + step])
             {
                 swap(&arr[i], &arr[i+step]);
+                swapped = true;
             }
         }
-        step /= factor;
+
     }
 }
 
@@ -342,6 +370,7 @@ int Widget::partition(double* arr, int low, int high){
 }
 
 bool Widget::correct(double* arr, int size) {
+    if(size <= 0) return false;
     while (size-- > 0){
         if (arr[size - 1] > arr[size]){
             qDebug(QString("Not sorted, false at: " + QString::number(size)).toStdString().c_str());
@@ -359,11 +388,6 @@ void Widget::shuffle(double* arr) {
 void Widget::bogoSort(double *arr) {
     while (!correct(arr, arrLen))
         shuffle(arr);
-}
-
-void Widget::setEnabledSearchButtons(bool b){
-    ui->searchBackButton->setEnabled(b);
-    ui->searchForwardButton->setEnabled(b);
 }
 
 void Widget::searchValue(double key, double* arr){
@@ -426,25 +450,6 @@ std::vector<int>::iterator Widget::decIndex(){
     --cur_index;
     return cur_index;
 }
-
-
-void Widget::on_searchBackButton_clicked()
-{
-    if(s_indexes.size() == 1) return chooseItem(*cur_index);
-    chooseItem(*decIndex());
-}
-
-void Widget::on_searchForwardButton_clicked()
-{
-    if(s_indexes.size() == 1) return chooseItem(*cur_index);
-    chooseItem(*incIndex());
-}
-
-void Widget::on_searchEdit_returnPressed()
-{
-    callSearchValue();
-}
-
 void Widget::callSearchValue(double* arr){
     ui->searchCountLabel->clear();
     if(ui->searchEdit->text().isEmpty()) return;
@@ -453,33 +458,43 @@ void Widget::callSearchValue(double* arr){
     if(!ok) return;
     searchValue(key, arr);
 }
-
-void Widget::on_searchEdit_textChanged(const QString &arg1)
-{
-    if(arg1.isEmpty()){
-        ui->searchCountLabel->clear();
-        return setEnabledSearchButtons(false);
-    }
-    bool ok = true;
-    ui->searchEdit->text().toDouble(&ok);
-    setWidgetProperty(ui->searchEdit, "state", ok ? "" : "error");
+double Widget::getMinValue(double* arr, bool sorted){
+    if(arrLen < 1) return 0;
+    if(sorted) return arr[0];
+    double min = arr[0];
+    for(int i = 1; i < arrLen; i++)
+        if(arr[i] < min) min = arr[i];
+    return min;
 }
 
-void Widget::on_removeDublicatesButton_clicked()
-{
-    this->cur_state = Remove;
-    if(arrLen <= 0) return;
-    double* nums = getTableArray();
-    if(!correct(nums, arrLen)) {
-        dublicateBox.show();
-        return;
-    }
-    removeDublicates(&nums);
-    ui->dataTable->setRowCount(arrLen);
-    callSearchValue(nums);
-    fillTable(nums);
-    delete[] nums;
-    this->cur_state = None;
+double Widget::getMaxValue(double* arr, bool sorted){
+    if(arrLen < 1) return 0;
+    if(sorted) return arr[arrLen-1];
+    double max = arr[0];
+    for(int i = 1; i < arrLen; i++)
+        if(arr[i] > max) max = arr[i];
+    return max;
+}
+
+///Returns false, if convertation to number failed
+bool Widget::getArrayCount(QString numstr, int* num){
+    bool ok = true;
+    int x = numstr.toInt(&ok);
+    if(x < MIN_ARRAY_SIZE || x > MAX_ARRAY_SIZE) ok = false;
+    if(num != nullptr) *num = x;
+    return ok;
+}
+void Widget::callMaxAndMin(State st, double* arr){
+    if(this->cur_state != st) return;
+    double* nums = (arr == nullptr ? getTableArray() : arr);
+    refreshMaxAndMinValues(nums, st == Sort ? true : false);
+    if(arr == nullptr) delete[] nums;
+}
+
+void Widget::swap(double* el1, double* el2){
+    double swp = *el2;
+    *el2 = *el1;
+    *el1 = swp;
 }
 
 void Widget::removeDublicates(double** p_arr){
