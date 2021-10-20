@@ -18,9 +18,10 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     setStyle(QApplication::style()); //Установка стиля на этот Widget
 
-    setupDublicateBox(); //Установка параметров MessageBox'а для кнопки удаления дубликатов
+    setupErrorBox(); //Установка параметров MessageBox'а для кнопки удаления дубликатов
 
     refreshMaxAndMinValues(); //Стартовое обновление максимальных и минимальных значений
+    refreshArrayLengthLabelValue(); //Стартовое обновление лейбла с размером массива
     setEnabledSearchButtons(false);
 }
 
@@ -31,10 +32,9 @@ Widget::~Widget()
 
 //Функции установки стартовых параметров
 
-void Widget::setupDublicateBox(){
-    dublicateBox.setWindowTitle("Message");
-    dublicateBox.setText("Отсортируйте список перед удалением дубликатов");
-    dublicateBox.setStandardButtons(QMessageBox::Ok);
+void Widget::setupErrorBox(){
+    errorBox.setWindowTitle("Message");
+    errorBox.setStandardButtons(QMessageBox::Ok);
 }
 
 /*void Widget::setupWaitBox(){
@@ -67,12 +67,10 @@ void Widget::setupDublicateBox(){
 void Widget::on_createArrayButton_clicked()
 {
     this->cur_state = Create;
-    int len = 0;
-    if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
-    arrLen = len;
-    if(arrLen == 0) return;
-    createTable(arrLen);
+    makeTable();
     fillArrayZero();
+
+    refreshArrayLengthLabelValue();
     ui->searchEdit->clear();
     ui->searchCountLabel->clear();
     this->cur_state = None;
@@ -81,18 +79,13 @@ void Widget::on_createArrayButton_clicked()
 void Widget::on_fillRandomButton_clicked()
 {
     this->cur_state = Randomize;
-    if(!isCreated) {
-        int len = 0;
-        if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
-        createTable(len);
-        arrLen = len;
-    }
-    else ui->dataTable->setRowCount(arrLen);
-    //if(ui->dataTable->rowCount() != len) createTable(len);
+    makeTable();
     fillArrayRandom();
 
     double* nums = getTableArray();
     callMaxAndMin(Randomize, nums);
+
+    refreshArrayLengthLabelValue();
     ui->searchEdit->clear();
     ui->searchCountLabel->clear();
 
@@ -130,7 +123,7 @@ void Widget::on_sortButton_clicked()
             bogoSort(nums);
             break;
     }
-    correct(nums, ui->dataTable->rowCount());
+    //correct(nums, ui->dataTable->rowCount());
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start); //Расчёт временнго промежутка
     ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms"); //Вывод затраченного времени на экран
@@ -161,15 +154,21 @@ void Widget::on_removeDublicatesButton_clicked()
     if(arrLen <= 0) return;
     double* nums = getTableArray();
     if(!correct(nums, arrLen)) {
-        dublicateBox.show();
+        callErrorBox("Отсоритуйте массив перед удалением дубликатов");
         return;
     }
     removeDublicates(&nums);
     ui->dataTable->setRowCount(arrLen);
     callSearchValue(nums);
+    refreshArrayLengthLabelValue();
     fillTable(nums);
     delete[] nums;
     this->cur_state = None;
+}
+
+void Widget::on_arrayCountEdit_returnPressed()
+{
+    on_createArrayButton_clicked();
 }
 
 void Widget::on_searchEdit_returnPressed()
@@ -213,6 +212,11 @@ void Widget::on_searchEdit_textChanged(const QString &arg1)
 
 //Функции работы с UI
 
+void Widget::callErrorBox(QString str){
+    errorBox.setText(str);
+    errorBox.show();
+}
+
 void Widget::setItemTextColor(QTableWidgetItem* item, QColor color){
     item->setForeground(QBrush(color));
 }
@@ -233,21 +237,40 @@ void Widget::refreshMaxAndMinValues(double* arr, bool sorted){
     ui->maxValueLabel->setText("Max: " + (arr == nullptr ? "0" : QString::number(getMaxValue(arr, sorted))));
 }
 
+void Widget::refreshArrayLengthLabelValue(){
+    ui->arrayCountLabel->setText("Текущий размер: " + QString::number(arrLen));
+}
+
+void Widget::makeTable(){
+    int len = 0 , rows = ui->dataTable->rowCount();
+    if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
+    arrLen = len;
+    if(!isCreated) {
+        createTable(len);
+    }
+    else{
+        ui->dataTable->setRowCount(len);
+        if(len > rows) createItemsInTable(rows, len);
+    }
+}
+
 void Widget::createTable(int size){
-    isCreated = false;
-    ui->dataTable->clear();
     ui->dataTable->setColumnCount(1);
     ui->dataTable->setRowCount(size);
     ui->dataTable->setHorizontalHeaderLabels({"Значение"});
-    for(int i = 0; i < size; i++) ui->dataTable->setItem(i, 0, new QTableWidgetItem);
+    createItemsInTable(0, size);
     isCreated = true;
+}
+
+void Widget::createItemsInTable(int startIndex, int size){
+    for(int i = startIndex; i < size; i++) ui->dataTable->setItem(i, 0, new QTableWidgetItem);
 }
 
 void Widget::fillArrayRandom(){
     ui->dataTable->clearSelection();
     srand(time(NULL));
     int x = 0;
-    for(int i = 0; i < ui->dataTable->rowCount(); i++){
+    for(int i = 0; i < arrLen; i++){
         x = rand();
         ui->dataTable->item(i, 0)->setText(QString::number(x));
     }
@@ -518,3 +541,15 @@ void Widget::removeDublicates(double** p_arr){
     *p_arr = newArr;
     arrLen = numVec.size();
 }
+
+void Widget::on_useCurrentSizeCheckBox_stateChanged(int arg1)
+{
+    resize = (bool) arg1;
+}
+
+
+void Widget::on_removeDublicatesCheckBox_stateChanged(int arg1)
+{
+    fastRemove = (bool) arg1;
+}
+

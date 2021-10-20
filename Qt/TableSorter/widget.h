@@ -36,6 +36,8 @@ public:
     void fillArrayZero();
     void fillTable(double*);
 
+    void callErrorBox(QString);
+
     void swap(double*, double*);
     int partition (double*, int, int);
     bool correct(double*, int);
@@ -63,10 +65,18 @@ private slots:
 
     void on_removeDublicatesButton_clicked();
 
+    void on_arrayCountEdit_returnPressed();
+
+    void on_useCurrentSizeCheckBox_stateChanged(int arg1);
+
+    void on_removeDublicatesCheckBox_stateChanged(int arg1);
+
 private:
     //QDialog* waitBox;
-    QMessageBox dublicateBox;
+    QMessageBox errorBox;
     State cur_state = None;
+    bool resize = false;
+    bool fastRemove = false; //Моментальное удаление дубликатов
     int arrLen = 0;
     std::vector<int> s_indexes;
     std::vector<int>::iterator cur_index;
@@ -75,13 +85,15 @@ private:
     void setEnabledSearchButtons(bool);
     bool checkErrors();
     bool isCreated = false;
+    void makeTable();
     void createTable(int);
+    void createItemsInTable(int, int);
     bool getArrayCount(QString, int* = nullptr);
     //void updateTableHeaderSize(); Deprecated
 
     //void setupMessageBox();
     //void setupWaitBox();
-    void setupDublicateBox();
+    void setupErrorBox();
 
     //Алгоритмы сортировки
     void bubbleSort(double*);
@@ -93,6 +105,7 @@ private:
     double getMinValue(double*, bool = false);
     double getMaxValue(double*, bool = false);
     void refreshMaxAndMinValues(double* = nullptr, bool = false);
+    void refreshArrayLengthLabelValue();
     void callMaxAndMin(State, double* = nullptr);
 
     void callSearchValue(double* = nullptr);
