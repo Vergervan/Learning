@@ -21,6 +21,9 @@ Widget::Widget(QWidget *parent)
     setupErrorBox(); //Установка параметров MessageBox'а для кнопки удаления дубликатов
     setupWarningBox();
 
+    ui->dataTable->setColumnCount(1);
+    ui->dataTable->setHorizontalHeaderLabels({"Значение"});
+
     on_arrayCountEdit_textChanged("");
     refreshMaxAndMinValues(); //Стартовое обновление максимальных и минимальных значений
     refreshArrayLengthLabelValue(); //Стартовое обновление лейбла с размером массива
@@ -133,7 +136,7 @@ void Widget::on_sortButton_clicked()
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start); //Расчёт временнго промежутка
     ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms"); //Вывод затраченного времени на экран
-    correct(nums, arrLen-1);
+    //correct(nums, arrLen-1);
 
     if(fastRemove){
         removeDublicates(&nums);
@@ -273,8 +276,10 @@ void Widget::refreshArrayLengthLabelValue(){
 }
 
 bool Widget::makeTable(){
-    int len = 0 , rows = ui->dataTable->rowCount();
-    if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return false;
+    int len = arrLen , rows = ui->dataTable->rowCount();
+    if(resize || cur_state == Create){
+        if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return false;
+    }
     arrLen = len;
     if(!isCreated) {
         createTable(len);
@@ -287,9 +292,7 @@ bool Widget::makeTable(){
 }
 
 void Widget::createTable(int size){
-    ui->dataTable->setColumnCount(1);
     ui->dataTable->setRowCount(size);
-    ui->dataTable->setHorizontalHeaderLabels({"Значение"});
     createItemsInTable(0, size);
     isCreated = true;
 }
