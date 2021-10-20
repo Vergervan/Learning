@@ -19,7 +19,9 @@ Widget::Widget(QWidget *parent)
     setStyle(QApplication::style()); //Установка стиля на этот Widget
 
     setupErrorBox(); //Установка параметров MessageBox'а для кнопки удаления дубликатов
+    setupWarningBox();
 
+    on_arrayCountEdit_textChanged("");
     refreshMaxAndMinValues(); //Стартовое обновление максимальных и минимальных значений
     refreshArrayLengthLabelValue(); //Стартовое обновление лейбла с размером массива
     setEnabledSearchButtons(false);
@@ -37,6 +39,10 @@ void Widget::setupErrorBox(){
     errorBox.setStandardButtons(QMessageBox::Ok);
 }
 
+void Widget::setupWarningBox(){
+    warningBox.setWindowTitle("Warning");
+    warningBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+}
 /*void Widget::setupWaitBox(){
     QLabel* lbl = new QLabel(waitBox);
     lbl->setText("Sorting is in the process\nPlease wait...");
@@ -67,7 +73,7 @@ void Widget::setupErrorBox(){
 void Widget::on_createArrayButton_clicked()
 {
     this->cur_state = Create;
-    makeTable();
+    if(!makeTable()) return;
     fillArrayZero();
 
     refreshArrayLengthLabelValue();
@@ -79,7 +85,7 @@ void Widget::on_createArrayButton_clicked()
 void Widget::on_fillRandomButton_clicked()
 {
     this->cur_state = Randomize;
-    makeTable();
+    if(!makeTable()) return;
     fillArrayRandom();
 
     double* nums = getTableArray();
@@ -103,7 +109,6 @@ void Widget::on_sortButton_clicked()
     if(arrLen < 1) return;
     if(checkErrors()) return;
     this->cur_state = Sort;
-    ui->sortTimeLabel->setText("Sorting...");
     double* nums = getTableArray();
     auto start = std::chrono::high_resolution_clock::now(); //Время начала выполнения сортировки
     switch(ui->sortCmb->currentIndex()){
@@ -120,6 +125,7 @@ void Widget::on_sortButton_clicked()
             gnomeSort(nums);
             break;
         case Bogo:
+            if(callWarningBox("Эта операция может занять неопределнное количество времени.\nПродолжить?") != QMessageBox::Yes) return;
             bogoSort(nums);
             break;
     }
@@ -127,6 +133,13 @@ void Widget::on_sortButton_clicked()
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start); //Расчёт временнго промежутка
     ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms"); //Вывод затраченного времени на экран
+    correct(nums, arrLen-1);
+
+    if(fastRemove){
+        removeDublicates(&nums);
+        ui->dataTable->setRowCount(arrLen);
+        refreshArrayLengthLabelValue();
+    }
 
     callMaxAndMin(Sort, nums);
     callSearchValue(nums);
@@ -153,7 +166,7 @@ void Widget::on_removeDublicatesButton_clicked()
     this->cur_state = Remove;
     if(arrLen <= 0) return;
     double* nums = getTableArray();
-    if(!correct(nums, arrLen)) {
+    if(!correct(nums, arrLen-1)) {
         callErrorBox("Отсоритуйте массив перед удалением дубликатов");
         return;
     }
@@ -180,7 +193,9 @@ void Widget::on_searchEdit_returnPressed()
 
 void Widget::on_arrayCountEdit_textChanged(const QString &arg1)
 {
-    setWidgetProperty(ui->arrayCountEdit, "state", getArrayCount(QString(arg1.toStdString().c_str())) ? "" : "error");
+    bool ok = getArrayCount(QString(arg1.toStdString().c_str()));
+    setWidgetProperty(ui->arrayCountEdit, "state", ok ? "" : "error");
+    ui->createArrayButton->setEnabled(ok);
 }
 
 void Widget::on_dataTable_itemChanged(QTableWidgetItem *item)
@@ -210,11 +225,27 @@ void Widget::on_searchEdit_textChanged(const QString &arg1)
     setWidgetProperty(ui->searchEdit, "state", ok ? "" : "error");
 }
 
+void Widget::on_useCurrentSizeCheckBox_stateChanged(int arg1)
+{
+    resize = (bool) arg1;
+}
+
+
+void Widget::on_removeDublicatesCheckBox_stateChanged(int arg1)
+{
+    fastRemove = (bool) arg1;
+}
+
 //Функции работы с UI
 
 void Widget::callErrorBox(QString str){
     errorBox.setText(str);
     errorBox.show();
+}
+
+int Widget::callWarningBox(QString str){
+    warningBox.setText(str);
+    return warningBox.exec();
 }
 
 void Widget::setItemTextColor(QTableWidgetItem* item, QColor color){
@@ -241,9 +272,9 @@ void Widget::refreshArrayLengthLabelValue(){
     ui->arrayCountLabel->setText("Текущий размер: " + QString::number(arrLen));
 }
 
-void Widget::makeTable(){
+bool Widget::makeTable(){
     int len = 0 , rows = ui->dataTable->rowCount();
-    if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return;
+    if(!getArrayCount(ui->arrayCountEdit->text(), &len)) return false;
     arrLen = len;
     if(!isCreated) {
         createTable(len);
@@ -252,6 +283,7 @@ void Widget::makeTable(){
         ui->dataTable->setRowCount(len);
         if(len > rows) createItemsInTable(rows, len);
     }
+    return true;
 }
 
 void Widget::createTable(int size){
@@ -397,12 +429,13 @@ int Widget::partition(double* arr, int low, int high){
 }
 
 bool Widget::correct(double* arr, int size) {
-    if(size <= 0) return false;
-    while (size-- > 0){
+    if(size <= -1) return false;
+    while (size != 0){
         if (arr[size - 1] > arr[size]){
-            qDebug(QString("Not sorted, false at: " + QString::number(size)).toStdString().c_str());
+            qDebug(QString("Not sorted, false at: " + QString::number(size) +" - " + QString::number(arr[size])).toStdString().c_str());
             return false;
         }
+        --size;
     }
     return true;
 }
@@ -413,7 +446,7 @@ void Widget::shuffle(double* arr) {
 }
 
 void Widget::bogoSort(double *arr) {
-    while (!correct(arr, arrLen))
+    while (!correct(arr, arrLen-1))
         shuffle(arr);
 }
 
@@ -541,15 +574,3 @@ void Widget::removeDublicates(double** p_arr){
     *p_arr = newArr;
     arrLen = numVec.size();
 }
-
-void Widget::on_useCurrentSizeCheckBox_stateChanged(int arg1)
-{
-    resize = (bool) arg1;
-}
-
-
-void Widget::on_removeDublicatesCheckBox_stateChanged(int arg1)
-{
-    fastRemove = (bool) arg1;
-}
-

@@ -37,6 +37,7 @@ public:
     void fillTable(double*);
 
     void callErrorBox(QString);
+    int callWarningBox(QString);
 
     void swap(double*, double*);
     int partition (double*, int, int);
@@ -73,8 +74,9 @@ private slots:
 
 private:
     //QDialog* waitBox;
-    QMessageBox errorBox;
+    QMessageBox errorBox, warningBox;
     State cur_state = None;
+    bool isCreated = false;
     bool resize = false;
     bool fastRemove = false; //Моментальное удаление дубликатов
     int arrLen = 0;
@@ -84,8 +86,7 @@ private:
     void setItemTextColor(QTableWidgetItem*, QColor);
     void setEnabledSearchButtons(bool);
     bool checkErrors();
-    bool isCreated = false;
-    void makeTable();
+    bool makeTable();
     void createTable(int);
     void createItemsInTable(int, int);
     bool getArrayCount(QString, int* = nullptr);
@@ -94,6 +95,7 @@ private:
     //void setupMessageBox();
     //void setupWaitBox();
     void setupErrorBox();
+    void setupWarningBox();
 
     //Алгоритмы сортировки
     void bubbleSort(double*);
