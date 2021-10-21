@@ -136,7 +136,7 @@ void Widget::on_sortButton_clicked()
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start); //Расчёт временнго промежутка
     ui->sortTimeLabel->setText(QString("Time: ") + QString::number(duration.count()) + " ms"); //Вывод затраченного времени на экран
-    //correct(nums, arrLen-1);
+    //correct(nums, arrLen);
 
     if(fastRemove){
         removeDublicates(&nums);
@@ -169,7 +169,7 @@ void Widget::on_removeDublicatesButton_clicked()
     this->cur_state = Remove;
     if(arrLen <= 0) return;
     double* nums = getTableArray();
-    if(!correct(nums, arrLen-1)) {
+    if(!correct(nums, arrLen)) {
         callErrorBox("Отсоритуйте массив перед удалением дубликатов");
         return;
     }
@@ -433,12 +433,11 @@ int Widget::partition(double* arr, int low, int high){
 
 bool Widget::correct(double* arr, int size) {
     if(size <= -1) return false;
-    while (size != 0){
-        if (arr[size - 1] > arr[size]){
-            qDebug(QString("Not sorted, false at: " + QString::number(size) +" - " + QString::number(arr[size])).toStdString().c_str());
+    for(int i = 1; i < size; i++){
+        if (arr[i] < arr[i-1]){
+            qDebug(QString("Not sorted, false at: " + QString::number(i) +" - " + QString::number(arr[i])).toStdString().c_str());
             return false;
         }
-        --size;
     }
     return true;
 }
@@ -449,7 +448,7 @@ void Widget::shuffle(double* arr) {
 }
 
 void Widget::bogoSort(double *arr) {
-    while (!correct(arr, arrLen-1))
+    while (!correct(arr, arrLen))
         shuffle(arr);
 }
 
