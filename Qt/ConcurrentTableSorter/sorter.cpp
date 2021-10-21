@@ -2,11 +2,26 @@
 
 Sorter::Sorter(QObject *parent) : QObject(parent)
 {
-    qRegisterMetaType<Sorter::SortType>("Sorter::SortType");
+    qRegisterMetaType<Sorter::SortType>("Sorter::SortType"); //Для работы enum с сигналами и слотами
+    connect(this, SIGNAL(aborted()), this, SLOT(clearStack()));
+}
+
+void Sorter::clearStack(){
+    while(safeStack.size() > 0){
+        if(*safeStack.top() != nullptr) delete[] *safeStack.top();
+        safeStack.pop();
+    }
+    emit finishWork();
+    isAborted = false;
+}
+
+void Sorter::abort(){
+    isAborted = true;
 }
 
 void Sorter::sortArray(double* arr, int len, Sorter::SortType type){
     emit startWork();
+    safeStack.push(&arr);
     auto start = std::chrono::high_resolution_clock::now(); //Время начала выполнения сортировки
     switch(type){
         case Bubble:
@@ -25,6 +40,11 @@ void Sorter::sortArray(double* arr, int len, Sorter::SortType type){
             bogoSort(arr, len);
             break;
     }
+    if(isAborted){
+        emit aborted();
+        return;
+    }
+    safeStack.pop();
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
     emit sendSortedArray(arr, std::chrono::duration_cast<std::chrono::milliseconds>(stop-start).count());
     emit finishWork();
@@ -32,7 +52,7 @@ void Sorter::sortArray(double* arr, int len, Sorter::SortType type){
 
 void Sorter::bubbleSort(double* arr, int len){
     bool changed = true;
-    while(changed){
+    while(changed && !isAborted){
         changed = false;
         for(int i = 0; i < len-1;++i){
             if(arr[i] > arr[i+1]){
@@ -48,7 +68,7 @@ void Sorter::combSort(double* arr, int len){
     int step = len; // Шаг сортировки
     bool swapped = true;
 
-    while(step != 1 || swapped)
+    while((step != 1 || swapped) && !isAborted)
     {
         step = int(step/factor);
         if(step < 1) step = 1;
@@ -67,7 +87,7 @@ void Sorter::combSort(double* arr, int len){
 
 void Sorter::gnomeSort(double* arr, int len){
     int i = 1, j = 2;
-    while(i < len){
+    while(i < len && !isAborted){
         if(arr[i - 1] < arr[i]) //Для разных направлений сортировки надо поменять знак на противоположный
             i = j++;
         else{
@@ -79,7 +99,7 @@ void Sorter::gnomeSort(double* arr, int len){
 }
 
 void Sorter::quickSort(double* arr, int low, int high){
-    if(low >= high) return;
+    if(low >= high || isAborted) return;
     int pi = partition(arr, low, high);
 
     //Рекурсивно сортируются элементы до раздления и после
@@ -118,8 +138,9 @@ void Sorter::shuffle(double* arr, int len) {
 }
 
 void Sorter::bogoSort(double *arr, int len) {
-    while(!correct(arr, len))
+    while(!correct(arr, len) && !isAborted){
         shuffle(arr, len);
+    }
 }
 
 void Sorter::swap(double& el1, double& el2){

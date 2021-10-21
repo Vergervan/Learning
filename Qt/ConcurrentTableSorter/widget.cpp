@@ -77,6 +77,10 @@ void Widget::writeLogMessage(QString str){
     qDebug(str.toStdString().c_str());
 }
 
+void Widget::waitBoxReject(){
+    qDebug("Wait box reject");
+}
+
 //ФУНКЦИИ СОБЫТИЙ
 
 //Обработка кликов и нажатий
@@ -142,7 +146,8 @@ void Widget::callSortArray(Sorter::SortType type){
     connect(sorter, SIGNAL(finishWork()), thread, SLOT(quit()));
     connect(sorter, SIGNAL(finishWork()), sorter, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    connect(waitBox, SIGNAL(rejected()), thread, SLOT(quit()));
+    connect(waitBox, SIGNAL(rejected()), sorter, SLOT(abort()));
+    connect(sorter, SIGNAL(aborted()), this, SLOT(waitBoxReject()));
 
     thread->start();
     double* nums = getTableArray();
@@ -163,6 +168,7 @@ void Widget::getSortedArray(double* arr, long duration){
 
     fillTable(arr);
     delete[] arr;
+    arr = nullptr;
     this->cur_state = None;
 }
 

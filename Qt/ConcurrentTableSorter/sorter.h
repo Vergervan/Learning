@@ -5,7 +5,7 @@
 #include <QString>
 
 #include <chrono>
-#include <time.h>
+#include <stack>
 
 class Sorter : public QObject
 {
@@ -16,6 +16,9 @@ public:
     enum SortType{
         Bubble, Quick, Comb, Gnome, Bogo
     };
+
+    bool isAborted = false;
+    std::stack<double**>safeStack;
 
     void bubbleSort(double*, int);
     void quickSort(double*, int, int);
@@ -32,12 +35,15 @@ private:
 
 public slots:
     void sortArray(double* arr, int len, Sorter::SortType type);
+    void clearStack();
+    void abort();
 
 signals:
     void startWork();
     void finishWork();
     void sendLogMessage(QString);
     void sendSortedArray(double* arr, long duration);
+    void aborted();
 };
 
 #endif // SORTER_H

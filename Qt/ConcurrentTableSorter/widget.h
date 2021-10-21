@@ -55,6 +55,7 @@ private slots:
 
     void writeLogMessage(QString);
     void getSortedArray(double*, long);
+    void waitBoxReject();
 signals:
     void sendToSort(double*, int, Sorter::SortType);
 private:
