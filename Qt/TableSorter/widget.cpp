@@ -435,7 +435,7 @@ bool Widget::correct(double* arr, int size) {
     if(size <= -1) return false;
     for(int i = 1; i < size; i++){
         if (arr[i] < arr[i-1]){
-            qDebug(QString("Not sorted, false at: " + QString::number(i) +" - " + QString::number(arr[i])).toStdString().c_str());
+            qDebug(QString("Not sorted, false at: " + QString::number(i+1) +" - " + QString::number(arr[i+1])).toStdString().c_str());
             return false;
         }
     }

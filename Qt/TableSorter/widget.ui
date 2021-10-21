@@ -6,50 +6,23 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>432</width>
-    <height>557</height>
+    <width>483</width>
+    <height>646</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Array Sorter</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0">
-   <item row="12" column="2" colspan="2">
-    <widget class="QLabel" name="searchHeadLabel">
+   <item row="5" column="2">
+    <widget class="QLabel" name="minValueLabel">
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
+       <pointsize>8</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Поиск</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="2" colspan="2">
-    <widget class="QPushButton" name="fillRandomButton">
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Заполнить случайными 
-числами</string>
-     </property>
-    </widget>
-   </item>
-   <item row="13" column="2" colspan="2">
-    <widget class="QLineEdit" name="searchEdit">
-     <property name="font">
-      <font>
-       <pointsize>14</pointsize>
-      </font>
+      <string>TextLabel</string>
      </property>
     </widget>
    </item>
@@ -65,62 +38,7 @@
      </property>
     </widget>
    </item>
-   <item row="10" column="2" colspan="2">
-    <widget class="QLabel" name="minValueLabel">
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="2" colspan="2">
-    <widget class="QLabel" name="maxValueLabel">
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2">
-    <widget class="QLabel" name="arrayCountLabel">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2" colspan="2">
-    <widget class="QLineEdit" name="arrayCountEdit">
-     <property name="font">
-      <font>
-       <pointsize>14</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2">
-    <widget class="QCheckBox" name="useCurrentSizeCheckBox">
-     <property name="font">
-      <font>
-       <pointsize>6</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Изменять размер</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="2" colspan="2">
+   <item row="9" column="2" colspan="2">
     <widget class="QComboBox" name="sortCmb">
      <item>
       <property name="text">
@@ -149,31 +67,28 @@
      </item>
     </widget>
    </item>
-   <item row="16" column="2" colspan="2">
-    <widget class="QLabel" name="searchCountLabel">
+   <item row="15" column="2" colspan="2">
+    <widget class="QLineEdit" name="searchEdit">
      <property name="font">
       <font>
-       <pointsize>7</pointsize>
+       <pointsize>14</pointsize>
       </font>
-     </property>
-     <property name="text">
-      <string/>
      </property>
     </widget>
    </item>
-   <item row="8" column="2" colspan="2">
-    <widget class="QPushButton" name="sortButton">
+   <item row="6" column="2">
+    <widget class="QLabel" name="maxValueLabel">
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>8</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Сортировать</string>
+      <string>TextLabel</string>
      </property>
     </widget>
    </item>
-   <item row="14" column="2" rowspan="2" colspan="2">
+   <item row="16" column="2" rowspan="2" colspan="2">
     <layout class="QHBoxLayout" name="searchButtonsLayout">
      <property name="spacing">
       <number>10</number>
@@ -220,19 +135,20 @@
      </item>
     </layout>
    </item>
-   <item row="6" column="2" colspan="2">
-    <widget class="QPushButton" name="checkErrorButton">
+   <item row="7" column="2" colspan="2">
+    <widget class="QPushButton" name="fillRandomButton">
      <property name="font">
       <font>
        <pointsize>10</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Проверка ошибок</string>
+      <string>Заполнить случайными 
+числами</string>
      </property>
     </widget>
    </item>
-   <item row="17" column="2" colspan="2">
+   <item row="19" column="2" colspan="2">
     <widget class="QPushButton" name="removeDublicatesButton">
      <property name="minimumSize">
       <size>
@@ -245,7 +161,34 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0" rowspan="20">
+   <item row="11" column="2" colspan="2">
+    <widget class="QLabel" name="sortTimeLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" rowspan="23">
     <widget class="QTableWidget" name="dataTable">
      <property name="minimumSize">
       <size>
@@ -264,18 +207,69 @@
      </attribute>
     </widget>
    </item>
-   <item row="9" column="2" colspan="2">
-    <widget class="QLabel" name="sortTimeLabel">
+   <item row="10" column="2" colspan="2">
+    <widget class="QPushButton" name="sortButton">
      <property name="font">
       <font>
-       <pointsize>8</pointsize>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Сортировать</string>
+     </property>
+    </widget>
+   </item>
+   <item row="18" column="2" colspan="2">
+    <widget class="QLabel" name="searchCountLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>7</pointsize>
       </font>
      </property>
      <property name="text">
       <string/>
      </property>
+    </widget>
+   </item>
+   <item row="0" column="2" colspan="2">
+    <widget class="QLineEdit" name="arrayCountEdit">
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="2" colspan="2">
+    <widget class="QLabel" name="searchHeadLabel">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Поиск</string>
+     </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLabel" name="arrayCountLabel">
+     <property name="text">
+      <string>TextLabel</string>
      </property>
     </widget>
    </item>
@@ -291,7 +285,37 @@
      </property>
     </widget>
    </item>
-   <item row="19" column="2">
+   <item row="3" column="2">
+    <widget class="QCheckBox" name="useCurrentSizeCheckBox">
+     <property name="font">
+      <font>
+       <pointsize>6</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Изменять размер</string>
+     </property>
+    </widget>
+   </item>
+   <item row="20" column="2" colspan="2">
+    <widget class="QPushButton" name="checkErrorButton">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Проверка ошибок</string>
+     </property>
+    </widget>
+   </item>
+   <item row="22" column="2" colspan="2">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
