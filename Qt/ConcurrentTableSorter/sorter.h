@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QCoreApplication>
+#include <QTimer>
 
 #include <chrono>
 #include <stack>
@@ -12,13 +14,13 @@ class Sorter : public QObject
     Q_OBJECT
 public:
     explicit Sorter(QObject *parent = nullptr);
-
+    ~Sorter();
     enum SortType{
         Bubble, Quick, Comb, Gnome, Bogo
     };
 
     bool isAborted = false;
-    std::stack<double**>safeStack;
+    QTimer* eventTimer;
 
     void bubbleSort(double*, int);
     void quickSort(double*, int, int);
@@ -30,6 +32,8 @@ public:
     static bool correct(double*, int);
 
 private:
+    std::stack<double**>safeStack;
+
     int partition (double*, int, int);
     void shuffle(double*, int);
 
@@ -37,6 +41,7 @@ public slots:
     void sortArray(double* arr, int len, Sorter::SortType type);
     void clearStack();
     void abort();
+    void updateEvents();
 
 signals:
     void startWork();

@@ -150,6 +150,7 @@ void Widget::callSortArray(Sorter::SortType type){
     connect(sorter, SIGNAL(aborted()), this, SLOT(waitBoxReject()));
 
     thread->start();
+    sorter->eventTimer->start(1000);
     double* nums = getTableArray();
     emit sendToSort(nums, arrLen, type);
 }

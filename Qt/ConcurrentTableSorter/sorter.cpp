@@ -4,6 +4,12 @@ Sorter::Sorter(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<Sorter::SortType>("Sorter::SortType"); //Для работы enum с сигналами и слотами
     connect(this, SIGNAL(aborted()), this, SLOT(clearStack()));
+    eventTimer = new QTimer;
+    connect(eventTimer, SIGNAL(timeout()), this, SLOT(updateEvents()));
+}
+
+Sorter::~Sorter(){
+    delete eventTimer;
 }
 
 void Sorter::clearStack(){
@@ -17,6 +23,10 @@ void Sorter::clearStack(){
 
 void Sorter::abort(){
     isAborted = true;
+}
+
+void Sorter::updateEvents(){
+    QCoreApplication::processEvents();
 }
 
 void Sorter::sortArray(double* arr, int len, Sorter::SortType type){
