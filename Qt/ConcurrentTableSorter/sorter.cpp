@@ -4,21 +4,15 @@ Sorter::Sorter(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<Sorter::SortType>("Sorter::SortType"); //Для работы enum с сигналами и слотами
     connect(this, SIGNAL(aborted()), this, SLOT(clearStack()));
-    eventTimer = new QTimer;
-    connect(eventTimer, SIGNAL(timeout()), this, SLOT(updateEvents()));
-}
-
-Sorter::~Sorter(){
-    delete eventTimer;
 }
 
 void Sorter::clearStack(){
+    emit sendLogMessage(QString("SafeStack called - Size: %1").arg(safeStack.size()));
     while(safeStack.size() > 0){
         if(*safeStack.top() != nullptr) delete[] *safeStack.top();
         safeStack.pop();
     }
     emit finishWork();
-    isAborted = false;
 }
 
 void Sorter::abort(){
@@ -52,6 +46,7 @@ void Sorter::sortArray(double* arr, int len, Sorter::SortType type){
     }
     if(isAborted){
         emit aborted();
+        updateEvents();
         return;
     }
     safeStack.pop();
@@ -70,6 +65,7 @@ void Sorter::bubbleSort(double* arr, int len){
                 changed = true;
             }
         }
+        updateEvents();
     }
 }
 
@@ -91,7 +87,7 @@ void Sorter::combSort(double* arr, int len){
                 swapped = true;
             }
         }
-
+        updateEvents();
     }
 }
 
@@ -105,10 +101,12 @@ void Sorter::gnomeSort(double* arr, int len){
             --i;
             if(i == 0) i = j++;
         }
+        updateEvents();
     }
 }
 
 void Sorter::quickSort(double* arr, int low, int high){
+    updateEvents();
     if(low >= high || isAborted) return;
     int pi = partition(arr, low, high);
 
@@ -150,6 +148,7 @@ void Sorter::shuffle(double* arr, int len) {
 void Sorter::bogoSort(double *arr, int len) {
     while(!correct(arr, len) && !isAborted){
         shuffle(arr, len);
+        updateEvents();
     }
 }
 

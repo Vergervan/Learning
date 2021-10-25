@@ -18,6 +18,8 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     setStyle(QApplication::style()); //Установка стиля на этот Widget
 
+    eventTimer = new QTimer;
+
     setupWaitBox();
     setupErrorBox(); //Установка параметров MessageBox'а для кнопки удаления дубликатов
     setupWarningBox();
@@ -33,6 +35,7 @@ Widget::Widget(QWidget *parent)
 
 Widget::~Widget()
 {
+    delete eventTimer;
     delete waitBox;
     delete ui;
 }
@@ -56,6 +59,7 @@ void Widget::setupWaitBox(){
     lbl->setWordWrap(true);
     lbl->setGeometry(0, 0, 200, 80);
     waitBox->setFixedSize(200, 80);
+    //waitBox->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     waitBox->setWindowTitle("Message");
     waitBox->setModal(true);
 }
@@ -79,6 +83,18 @@ void Widget::writeLogMessage(QString str){
 
 void Widget::waitBoxReject(){
     qDebug("Wait box reject");
+}
+
+void Widget::startEventTimer(){
+    eventTimer->start(1000);
+}
+
+void Widget::stopEventTimer(){
+    eventTimer->stop();
+}
+
+void Widget::updateEvents(){
+    QCoreApplication::processEvents();
 }
 
 //ФУНКЦИИ СОБЫТИЙ
@@ -150,14 +166,12 @@ void Widget::callSortArray(Sorter::SortType type){
     connect(sorter, SIGNAL(aborted()), this, SLOT(waitBoxReject()));
 
     thread->start();
-    sorter->eventTimer->start(1000);
     double* nums = getTableArray();
     emit sendToSort(nums, arrLen, type);
 }
 
 void Widget::getSortedArray(double* arr, long duration){
     ui->sortTimeLabel->setText(QString("Time: %1 ms").arg(QString::number(duration))); //Вывод затраченного на сортировку времени в UI
-
     if(fastRemove){
         removeDublicates(&arr);
         ui->dataTable->setRowCount(arrLen);

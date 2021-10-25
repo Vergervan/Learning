@@ -14,13 +14,11 @@ class Sorter : public QObject
     Q_OBJECT
 public:
     explicit Sorter(QObject *parent = nullptr);
-    ~Sorter();
     enum SortType{
         Bubble, Quick, Comb, Gnome, Bogo
     };
 
     bool isAborted = false;
-    QTimer* eventTimer;
 
     void bubbleSort(double*, int);
     void quickSort(double*, int, int);

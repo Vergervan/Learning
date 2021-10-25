@@ -28,6 +28,8 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
+    QTimer* eventTimer;
+
 
     //Функции заполнения
     void fillArrayRandom();
@@ -56,6 +58,10 @@ private slots:
     void writeLogMessage(QString);
     void getSortedArray(double*, long);
     void waitBoxReject();
+public slots:
+    void startEventTimer();
+    void stopEventTimer();
+    void updateEvents();
 signals:
     void sendToSort(double*, int, Sorter::SortType);
 private:
