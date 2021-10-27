@@ -34,6 +34,7 @@ public:
     //Функции заполнения
     void fillArrayRandom();
     void fillArrayZero();
+    void fillTable(double*);
 
     void callErrorBox(QString);
     int callWarningBox(QString);
@@ -58,7 +59,7 @@ private slots:
     void getNewArraySize(int);
     void waitBoxReject();
 public slots:
-    void fillTable(double*);
+    void fillWithoutDublicates(double*);
     void startEventTimer();
     void stopEventTimer();
     void updateEvents();

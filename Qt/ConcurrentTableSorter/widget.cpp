@@ -113,6 +113,13 @@ void Widget::changeWaitBoxText(QString str){
     waitBox->findChild<QLabel*>("Label")->setText(str);
 }
 
+void Widget::fillWithoutDublicates(double* arr){
+    ui->dataTable->setRowCount(arrLen);
+    fillTable(arr);
+    delete[] arr;
+    this->cur_state = None;
+}
+
 //ФУНКЦИИ СОБЫТИЙ
 
 //Обработка кликов и нажатий
@@ -230,26 +237,30 @@ void Widget::on_removeDublicatesButton_clicked()
 {
     this->cur_state = Remove;
     if(arrLen <= 0) return;
-
+    double* nums = getTableArray();
+    if(!Sorter::correct(nums, arrLen)) {
+        callErrorBox("Отсоритуйте массив перед удалением дубликатов");
+        delete[] nums;
+        return;
+    }
     QThread* thread = new QThread;
     Sorter* sorter = new Sorter;
     sorter->moveToThread(thread);
 
     connect(sorter, SIGNAL(startRemoveDublicates()), this, SLOT(dublicateWaitBox()));
-    connect(sorter, SIGNAL(startRemoveDublicates()), waitBox, &QDialog::show);
-    connect(sorter, SIGNAL(endRemoveDublicates()), waitBox, &QDialog::hide);
+    connect(sorter, SIGNAL(startRemoveDublicates()), waitBox, SLOT(show()));
+    connect(sorter, SIGNAL(endRemoveDublicates()), waitBox, SLOT(hide()));
     connect(sorter, SIGNAL(sendNewArraySize(int)), this, SLOT(getNewArraySize(int)));
 
     connect(sorter, SIGNAL(endRemoveDublicates()), thread, SLOT(quit()));
-    connect(sorter, SIGNAL(endRemoveDublicates()), sorter, deleteLater());
+    connect(sorter, SIGNAL(endRemoveDublicates()), sorter, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    connect(sorter, SIGNAL(arrayWithoutDublicates(double*)), this, SLOT(fillTable(double*)));
+    connect(sorter, SIGNAL(arrayWithoutDublicates(double*)), this, SLOT(fillWithoutDublicates(double*)));
 
-    double* nums = getTableArray();
-    if(!Sorter::correct(nums, arrLen)) {
-        callErrorBox("Отсоритуйте массив перед удалением дубликатов");
-        return;
-    }
+    connect(this, SIGNAL(sendToRemoveDublicates(double**,int)), sorter, SLOT(removeDublicates(double**,int)));
+
+    thread->start();
+
     emit sendToRemoveDublicates(&nums, arrLen);
 }
 
