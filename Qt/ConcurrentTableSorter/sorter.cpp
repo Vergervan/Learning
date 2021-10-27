@@ -23,7 +23,7 @@ void Sorter::updateEvents(){
     QCoreApplication::processEvents();
 }
 
-void Sorter::sortArray(double* arr, int len, Sorter::SortType type){
+void Sorter::sortArray(double* arr, int len, Sorter::SortType type, bool noDublicates){
     emit startWork();
     safeStack.push(&arr);
     auto start = std::chrono::high_resolution_clock::now(); //Время начала выполнения сортировки
@@ -45,14 +45,39 @@ void Sorter::sortArray(double* arr, int len, Sorter::SortType type){
             break;
     }
     if(isAborted){
+        qDebug("Aborted after break sort");
         emit aborted();
         updateEvents();
         return;
     }
     safeStack.pop();
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
+    if(noDublicates){
+        removeDublicates(&arr, len);
+    }
     emit sendSortedArray(arr, std::chrono::duration_cast<std::chrono::milliseconds>(stop-start).count());
     emit finishWork();
+}
+
+void Sorter::removeDublicates(double** p_arr, int len){
+    emit startRemoveDublicates();
+    std::vector<double> numVec;
+    double num = (*p_arr)[0];
+    for(int i = 1; i <= len; i++){
+        if((*p_arr)[i] != num) {
+            numVec.push_back(num);
+            num = (*p_arr)[i];
+        }
+    }
+    qDebug(QString::number(numVec.size()).toStdString().c_str());
+    double* newArr = new double[numVec.size()];
+    for(unsigned int i = 0; i < numVec.size(); i++)
+        newArr[i] = numVec.at(i);
+    delete[] *p_arr;
+    *p_arr = newArr;
+    emit sendNewArraySize(numVec.size());
+    emit arrayWithoutDublicates(newArr);
+    emit endRemoveDublicates();
 }
 
 void Sorter::bubbleSort(double* arr, int len){

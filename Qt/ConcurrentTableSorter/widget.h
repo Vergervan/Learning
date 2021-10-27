@@ -34,7 +34,6 @@ public:
     //Функции заполнения
     void fillArrayRandom();
     void fillArrayZero();
-    void fillTable(double*);
 
     void callErrorBox(QString);
     int callWarningBox(QString);
@@ -55,15 +54,20 @@ private slots:
     void on_useCurrentSizeCheckBox_stateChanged(int arg1);
     void on_removeDublicatesCheckBox_stateChanged(int arg1);
 
-    void writeLogMessage(QString);
     void getSortedArray(double*, long);
+    void getNewArraySize(int);
     void waitBoxReject();
 public slots:
+    void fillTable(double*);
     void startEventTimer();
     void stopEventTimer();
     void updateEvents();
+    void writeLogMessage(QString);
+    void changeWaitBoxText(QString);
+    void dublicateWaitBox();
 signals:
-    void sendToSort(double*, int, Sorter::SortType);
+    void sendToSort(double*, int, Sorter::SortType, bool = false);
+    void sendToRemoveDublicates(double**, int);
 private:
     QDialog* waitBox;
     QMessageBox errorBox, warningBox;

@@ -54,7 +54,7 @@ void Widget::setupWarningBox(){
 void Widget::setupWaitBox(){
     waitBox = new QDialog;
     QLabel* lbl = new QLabel(waitBox);
-    lbl->setText("Sorting is in the process\nPlease wait...");
+    lbl->setObjectName("Label");
     lbl->setAlignment(Qt::AlignCenter);
     lbl->setWordWrap(true);
     lbl->setGeometry(0, 0, 200, 80);
@@ -77,6 +77,8 @@ void Widget::setupWaitBox(){
     ui->dataTable->setColumnWidth(0, ui->dataTable->width() - 30 + columnRatio); //Гибкая смена ширины заголовка таблицы в зависимости от размеров экрана
 }*/
 
+//СЛОТЫ
+
 void Widget::writeLogMessage(QString str){
     qDebug(str.toStdString().c_str());
 }
@@ -87,14 +89,28 @@ void Widget::waitBoxReject(){
 
 void Widget::startEventTimer(){
     eventTimer->start(1000);
+    qDebug("Start event timer");
 }
 
 void Widget::stopEventTimer(){
     eventTimer->stop();
+    qDebug("Stop event timer");
 }
 
 void Widget::updateEvents(){
     QCoreApplication::processEvents();
+}
+
+void Widget::getNewArraySize(int len){
+    arrLen = len;
+}
+
+void Widget::dublicateWaitBox(){
+    changeWaitBoxText("Removing dublicates...");
+}
+
+void Widget::changeWaitBoxText(QString str){
+    waitBox->findChild<QLabel*>("Label")->setText(str);
 }
 
 //ФУНКЦИИ СОБЫТИЙ
@@ -139,6 +155,8 @@ void Widget::on_sortButton_clicked()
 {
     if(arrLen < 1) return;
     if(checkErrors()) return;
+    ui->sortTimeLabel->clear();
+    waitBox->findChild<QLabel*>("Label")->setText("Sorting is in the process\nPlease wait...");
     Sorter::SortType chosenType = (Sorter::SortType)ui->sortCmb->currentIndex();
     switch(chosenType){
         case Sorter::Bogo:
@@ -155,10 +173,22 @@ void Widget::callSortArray(Sorter::SortType type){
     Sorter* sorter = new Sorter;
     sorter->moveToThread(thread);
 
+    //Log
+    connect(sorter, &Sorter::sendLogMessage, this, &Widget::writeLogMessage);
+
+    //MessageBox
     connect(sorter, SIGNAL(startWork()), waitBox, SLOT(show()));
     connect(sorter, SIGNAL(finishWork()), waitBox, SLOT(hide()));
+
+    //connect(sorter, SIGNAL(startWork()), this, SLOT(startEventTimer()));
+    //connect(sorter, SIGNAL(finishWork()), this, SLOT(stopEventTimer()));
+    //connect(eventTimer, SIGNAL(timeout()), sorter, SLOT(updateEvents()));
+
     connect(sorter, SIGNAL(sendSortedArray(double*,long)), this, SLOT(getSortedArray(double*,long)));
-    connect(this, SIGNAL(sendToSort(double*,int,Sorter::SortType)), sorter, SLOT(sortArray(double*,int,Sorter::SortType)));
+    connect(this, SIGNAL(sendToSort(double*,int,Sorter::SortType,bool)), sorter, SLOT(sortArray(double*,int,Sorter::SortType,bool)));
+    connect(sorter, SIGNAL(startRemoveDublicates()), this, SLOT(dublicateWaitBox()));
+    connect(sorter, SIGNAL(sendNewArraySize(int)), this, SLOT(getNewArraySize(int))); //Добавить новый сигнал для окончания
+
     connect(sorter, SIGNAL(finishWork()), thread, SLOT(quit()));
     connect(sorter, SIGNAL(finishWork()), sorter, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
@@ -167,16 +197,13 @@ void Widget::callSortArray(Sorter::SortType type){
 
     thread->start();
     double* nums = getTableArray();
-    emit sendToSort(nums, arrLen, type);
+    emit sendToSort(nums, arrLen, type, ui->removeDublicatesCheckBox->isChecked());
 }
 
 void Widget::getSortedArray(double* arr, long duration){
     ui->sortTimeLabel->setText(QString("Time: %1 ms").arg(QString::number(duration))); //Вывод затраченного на сортировку времени в UI
-    if(fastRemove){
-        removeDublicates(&arr);
-        ui->dataTable->setRowCount(arrLen);
-        refreshArrayLengthLabelValue();
-    }
+    ui->dataTable->setRowCount(arrLen);
+    refreshArrayLengthLabelValue();
 
     callMaxAndMin(Sort, arr);
     callSearchValue(arr);
@@ -203,18 +230,27 @@ void Widget::on_removeDublicatesButton_clicked()
 {
     this->cur_state = Remove;
     if(arrLen <= 0) return;
+
+    QThread* thread = new QThread;
+    Sorter* sorter = new Sorter;
+    sorter->moveToThread(thread);
+
+    connect(sorter, SIGNAL(startRemoveDublicates()), this, SLOT(dublicateWaitBox()));
+    connect(sorter, SIGNAL(startRemoveDublicates()), waitBox, &QDialog::show);
+    connect(sorter, SIGNAL(endRemoveDublicates()), waitBox, &QDialog::hide);
+    connect(sorter, SIGNAL(sendNewArraySize(int)), this, SLOT(getNewArraySize(int)));
+
+    connect(sorter, SIGNAL(endRemoveDublicates()), thread, SLOT(quit()));
+    connect(sorter, SIGNAL(endRemoveDublicates()), sorter, deleteLater());
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(sorter, SIGNAL(arrayWithoutDublicates(double*)), this, SLOT(fillTable(double*)));
+
     double* nums = getTableArray();
     if(!Sorter::correct(nums, arrLen)) {
         callErrorBox("Отсоритуйте массив перед удалением дубликатов");
         return;
     }
-    removeDublicates(&nums);
-    ui->dataTable->setRowCount(arrLen);
-    callSearchValue(nums);
-    refreshArrayLengthLabelValue();
-    fillTable(nums);
-    delete[] nums;
-    this->cur_state = None;
+    emit sendToRemoveDublicates(&nums, arrLen);
 }
 
 void Widget::on_arrayCountEdit_returnPressed()
@@ -487,22 +523,4 @@ void Widget::callMaxAndMin(State st, double* arr){
     double* nums = (arr == nullptr ? getTableArray() : arr);
     refreshMaxAndMinValues(nums, st == Sort ? true : false);
     if(arr == nullptr) delete[] nums;
-}
-
-void Widget::removeDublicates(double** p_arr){
-    std::vector<double> numVec;
-    double num = (*p_arr)[0];
-    for(int i = 1; i <= arrLen; i++){
-        if((*p_arr)[i] != num) {
-            numVec.push_back(num);
-            num = (*p_arr)[i];
-        }
-    }
-    qDebug(QString::number(numVec.size()).toStdString().c_str());
-    double* newArr = new double[numVec.size()];
-    for(unsigned int i = 0; i < numVec.size(); i++)
-        newArr[i] = numVec.at(i);
-    delete[] *p_arr;
-    *p_arr = newArr;
-    arrLen = numVec.size();
 }

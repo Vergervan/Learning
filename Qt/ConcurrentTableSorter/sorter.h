@@ -36,7 +36,8 @@ private:
     void shuffle(double*, int);
 
 public slots:
-    void sortArray(double* arr, int len, Sorter::SortType type);
+    void sortArray(double* arr, int len, Sorter::SortType type, bool noDublicates = false);
+    void removeDublicates(double** arr, int len);
     void clearStack();
     void abort();
     void updateEvents();
@@ -44,8 +45,12 @@ public slots:
 signals:
     void startWork();
     void finishWork();
+    void startRemoveDublicates();
+    void endRemoveDublicates();
+    void sendNewArraySize(int newLen);
     void sendLogMessage(QString);
     void sendSortedArray(double* arr, long duration);
+    void arrayWithoutDublicates(double* arr);
     void aborted();
 };
 
