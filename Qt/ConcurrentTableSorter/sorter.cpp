@@ -15,14 +15,6 @@ void Sorter::clearStack(){
     emit finishWork();
 }
 
-void Sorter::abort(){
-    isAborted = true;
-}
-
-void Sorter::updateEvents(){
-    QCoreApplication::processEvents();
-}
-
 void Sorter::sortArray(double* arr, int len, Sorter::SortType type, bool noDublicates){
     emit startWork();
     safeStack.push(&arr);
@@ -47,13 +39,12 @@ void Sorter::sortArray(double* arr, int len, Sorter::SortType type, bool noDubli
     if(isAborted){
         qDebug("Aborted after break sort");
         emit aborted();
-        updateEvents();
         return;
     }
     safeStack.pop();
     auto stop = std::chrono::high_resolution_clock::now(); //Время завершения
     if(noDublicates){
-        removeDublicates(&arr, len);
+        removeDublicates(&arr, len); //TODO: Исправить ошибку с изменением текста WaitBox'а при использовании быстрых сортировок
     }
     emit sendSortedArray(arr, std::chrono::duration_cast<std::chrono::milliseconds>(stop-start).count());
     emit finishWork();
@@ -62,18 +53,19 @@ void Sorter::sortArray(double* arr, int len, Sorter::SortType type, bool noDubli
 void Sorter::removeDublicates(double** p_arr, int len){
     emit startRemoveDublicates();
     std::vector<double> numVec;
-    double num = (*p_arr)[0];
-    for(int i = 1; i <= len; i++){
-        if((*p_arr)[i] != num) {
+    double* arr = *p_arr;
+    double num = arr[0];
+    for(int i = 1; i < len; i++){
+        if(arr[i] != num) {
             numVec.push_back(num);
-            num = (*p_arr)[i];
+            num = arr[i];
         }
     }
     qDebug(QString::number(numVec.size()).toStdString().c_str());
     double* newArr = new double[numVec.size()];
     for(unsigned int i = 0; i < numVec.size(); i++)
         newArr[i] = numVec.at(i);
-    delete[] *p_arr;
+    delete[] arr;
     *p_arr = newArr;
     emit sendNewArraySize(numVec.size());
     emit arrayWithoutDublicates(newArr);
@@ -90,7 +82,6 @@ void Sorter::bubbleSort(double* arr, int len){
                 changed = true;
             }
         }
-        updateEvents();
     }
 }
 
@@ -112,7 +103,6 @@ void Sorter::combSort(double* arr, int len){
                 swapped = true;
             }
         }
-        updateEvents();
     }
 }
 
@@ -126,12 +116,10 @@ void Sorter::gnomeSort(double* arr, int len){
             --i;
             if(i == 0) i = j++;
         }
-        updateEvents();
     }
 }
 
 void Sorter::quickSort(double* arr, int low, int high){
-    updateEvents();
     if(low >= high || isAborted) return;
     int pi = partition(arr, low, high);
 
@@ -173,7 +161,6 @@ void Sorter::shuffle(double* arr, int len) {
 void Sorter::bogoSort(double *arr, int len) {
     while(!correct(arr, len) && !isAborted){
         shuffle(arr, len);
-        updateEvents();
     }
 }
 

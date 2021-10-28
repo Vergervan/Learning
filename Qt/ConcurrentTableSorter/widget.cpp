@@ -18,8 +18,6 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     setStyle(QApplication::style()); //Установка стиля на этот Widget
 
-    eventTimer = new QTimer;
-
     setupWaitBox();
     setupErrorBox(); //Установка параметров MessageBox'а для кнопки удаления дубликатов
     setupWarningBox();
@@ -35,8 +33,7 @@ Widget::Widget(QWidget *parent)
 
 Widget::~Widget()
 {
-    delete eventTimer;
-    delete waitBox;
+    //if(waitBox != nullptr) delete waitBox;
     delete ui;
 }
 
@@ -81,24 +78,6 @@ void Widget::setupWaitBox(){
 
 void Widget::writeLogMessage(QString str){
     qDebug(str.toStdString().c_str());
-}
-
-void Widget::waitBoxReject(){
-    qDebug("Wait box reject");
-}
-
-void Widget::startEventTimer(){
-    eventTimer->start(1000);
-    qDebug("Start event timer");
-}
-
-void Widget::stopEventTimer(){
-    eventTimer->stop();
-    qDebug("Stop event timer");
-}
-
-void Widget::updateEvents(){
-    QCoreApplication::processEvents();
 }
 
 void Widget::getNewArraySize(int len){
@@ -193,18 +172,50 @@ void Widget::callSortArray(Sorter::SortType type){
 
     connect(sorter, SIGNAL(sendSortedArray(double*,long)), this, SLOT(getSortedArray(double*,long)));
     connect(this, SIGNAL(sendToSort(double*,int,Sorter::SortType,bool)), sorter, SLOT(sortArray(double*,int,Sorter::SortType,bool)));
-    connect(sorter, SIGNAL(startRemoveDublicates()), this, SLOT(dublicateWaitBox()));
+    connect(sorter, &Sorter::startRemoveDublicates, [this](){changeWaitBoxText("Removing dublicates...");});
     connect(sorter, SIGNAL(sendNewArraySize(int)), this, SLOT(getNewArraySize(int))); //Добавить новый сигнал для окончания
 
     connect(sorter, SIGNAL(finishWork()), thread, SLOT(quit()));
     connect(sorter, SIGNAL(finishWork()), sorter, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    connect(waitBox, SIGNAL(rejected()), sorter, SLOT(abort()));
-    connect(sorter, SIGNAL(aborted()), this, SLOT(waitBoxReject()));
+    connect(waitBox, &QDialog::rejected, [sorter](){
+        sorter->isAborted = true;
+    });
 
     thread->start();
     double* nums = getTableArray();
     emit sendToSort(nums, arrLen, type, ui->removeDublicatesCheckBox->isChecked());
+}
+
+void Widget::callRemoveDublicates(){
+    this->cur_state = Remove;
+    double* nums = getTableArray();
+    if(!Sorter::correct(nums, arrLen)) {
+        callErrorBox("Отсоритуйте массив перед удалением дубликатов");
+        delete[] nums;
+        return;
+    }
+    QThread* thread = new QThread;
+    Sorter* sorter = new Sorter;
+    sorter->moveToThread(thread);
+
+    connect(sorter, SIGNAL(startRemoveDublicates()), this, SLOT(dublicateWaitBox()));
+    connect(sorter, SIGNAL(startRemoveDublicates()), waitBox, SLOT(show()));
+    connect(sorter, SIGNAL(endRemoveDublicates()), waitBox, SLOT(hide()));
+    connect(sorter, SIGNAL(sendNewArraySize(int)), this, SLOT(getNewArraySize(int)));
+
+    connect(sorter, SIGNAL(endRemoveDublicates()), thread, SLOT(quit()));
+    connect(sorter, SIGNAL(endRemoveDublicates()), sorter, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(sorter, SIGNAL(arrayWithoutDublicates(double*)), this, SLOT(fillWithoutDublicates(double*)));
+
+    connect(this, SIGNAL(sendToRemoveDublicates(double**,int)), sorter, SLOT(removeDublicates(double**,int)));
+
+    thread->start();
+
+    double** p_arr = &nums;
+
+    emit sendToRemoveDublicates(p_arr, arrLen);
 }
 
 void Widget::getSortedArray(double* arr, long duration){
@@ -235,33 +246,8 @@ void Widget::on_searchForwardButton_clicked()
 
 void Widget::on_removeDublicatesButton_clicked()
 {
-    this->cur_state = Remove;
     if(arrLen <= 0) return;
-    double* nums = getTableArray();
-    if(!Sorter::correct(nums, arrLen)) {
-        callErrorBox("Отсоритуйте массив перед удалением дубликатов");
-        delete[] nums;
-        return;
-    }
-    QThread* thread = new QThread;
-    Sorter* sorter = new Sorter;
-    sorter->moveToThread(thread);
-
-    connect(sorter, SIGNAL(startRemoveDublicates()), this, SLOT(dublicateWaitBox()));
-    connect(sorter, SIGNAL(startRemoveDublicates()), waitBox, SLOT(show()));
-    connect(sorter, SIGNAL(endRemoveDublicates()), waitBox, SLOT(hide()));
-    connect(sorter, SIGNAL(sendNewArraySize(int)), this, SLOT(getNewArraySize(int)));
-
-    connect(sorter, SIGNAL(endRemoveDublicates()), thread, SLOT(quit()));
-    connect(sorter, SIGNAL(endRemoveDublicates()), sorter, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    connect(sorter, SIGNAL(arrayWithoutDublicates(double*)), this, SLOT(fillWithoutDublicates(double*)));
-
-    connect(this, SIGNAL(sendToRemoveDublicates(double**,int)), sorter, SLOT(removeDublicates(double**,int)));
-
-    thread->start();
-
-    emit sendToRemoveDublicates(&nums, arrLen);
+    callRemoveDublicates();
 }
 
 void Widget::on_arrayCountEdit_returnPressed()

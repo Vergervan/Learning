@@ -28,8 +28,6 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
-    QTimer* eventTimer;
-
 
     //Функции заполнения
     void fillArrayRandom();
@@ -57,12 +55,8 @@ private slots:
 
     void getSortedArray(double*, long);
     void getNewArraySize(int);
-    void waitBoxReject();
 public slots:
     void fillWithoutDublicates(double*);
-    void startEventTimer();
-    void stopEventTimer();
-    void updateEvents();
     void writeLogMessage(QString);
     void changeWaitBoxText(QString);
     void dublicateWaitBox();
@@ -90,6 +84,7 @@ private:
     //void updateTableHeaderSize(); Deprecated
 
     void callSortArray(Sorter::SortType);
+    void callRemoveDublicates();
 
     void setupWaitBox();
     void setupErrorBox();
