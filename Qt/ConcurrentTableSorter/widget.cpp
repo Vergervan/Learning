@@ -6,7 +6,7 @@
 #include <QTimer>
 
 #define MIN_ARRAY_SIZE 1
-#define MAX_ARRAY_SIZE 100000
+#define MAX_ARRAY_SIZE 1000000
 
 //TODO
 //#define RAND_NUM_BOUND 1000000 // Максимальная граница случайного числа
