@@ -1,0 +1,14 @@
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\bin\Debug\netcoreapp3.1\TestTask2.exe
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\bin\Debug\netcoreapp3.1\TestTask2.deps.json
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\bin\Debug\netcoreapp3.1\TestTask2.runtimeconfig.json
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\bin\Debug\netcoreapp3.1\TestTask2.runtimeconfig.dev.json
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\bin\Debug\netcoreapp3.1\TestTask2.dll
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\bin\Debug\netcoreapp3.1\TestTask2.pdb
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\obj\Debug\netcoreapp3.1\TestTask2.csproj.AssemblyReference.cache
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\obj\Debug\netcoreapp3.1\TestTask2.GeneratedMSBuildEditorConfig.editorconfig
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\obj\Debug\netcoreapp3.1\TestTask2.AssemblyInfoInputs.cache
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\obj\Debug\netcoreapp3.1\TestTask2.AssemblyInfo.cs
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\obj\Debug\netcoreapp3.1\TestTask2.csproj.CoreCompileInputs.cache
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\obj\Debug\netcoreapp3.1\TestTask2.dll
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\obj\Debug\netcoreapp3.1\TestTask2.pdb
+D:\GitRepositories\Learning\ConsoleApps\TestTask2\obj\Debug\netcoreapp3.1\TestTask2.genruntimeconfig.cache
