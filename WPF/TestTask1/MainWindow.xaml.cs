@@ -57,14 +57,21 @@ namespace TestTask1
         {
             string[] strIdentifiers = stringIdentifiersBox.Text.Trim().Replace(" ", "").Split(',', ';').Distinct().ToArray();
             List<IdentifierInfo> identifiers = new List<IdentifierInfo>();
+            List<string> errorIdentifiers = new List<string>();
             foreach (var str in strIdentifiers)
             {
                 if (int.TryParse(str, out int num) && num >= 1 && num <= 20)
                 {
                     identifiers.Add(new IdentifierInfo(num));
                 }
+                else
+                {
+                    errorIdentifiers.Add(str);
+                }
             }
             FillIdentifiersFromServer(identifiers);
+            if(errorIdentifiers.Count > 0) 
+                ShowErrorIdentifiers(errorIdentifiers);
         }
         private void FillIdentifiersFromServer(IEnumerable<IdentifierInfo> identifiers)
         {
@@ -93,6 +100,15 @@ namespace TestTask1
             source.Clear();
             foreach (var item in identifiers)
                 source.Add(item);
+        }
+
+        private void ShowErrorIdentifiers(IEnumerable<string> errorIdentifiers)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append($"Identifier's \"");
+            builder.AppendJoin(", ", errorIdentifiers);
+            builder.Append("\" were not found or available");
+            MessageBox.Show(builder.ToString());
         }
 
         //Json deserializer from bytes
