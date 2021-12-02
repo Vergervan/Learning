@@ -56,19 +56,20 @@ namespace TestTask1
         private void ProcessIdentifiers()
         {
             string[] strIdentifiers = stringIdentifiersBox.Text.Trim().Replace(" ", "").Split(',', ';').Distinct().ToArray();
-            List<IdentifierInfo> identifiers = new List<IdentifierInfo>();
+            List<int> identifiersInt = new List<int>();
             List<string> errorIdentifiers = new List<string>();
             foreach (var str in strIdentifiers)
             {
                 if (int.TryParse(str, out int num) && num >= 1 && num <= 20)
                 {
-                    identifiers.Add(new IdentifierInfo(num));
+                    identifiersInt.Add(num);
                 }
                 else
                 {
                     errorIdentifiers.Add(str);
                 }
             }
+            List<IdentifierInfo> identifiers = identifiersInt.Distinct().Select(x => new IdentifierInfo(x)).ToList();
             FillIdentifiersFromServer(identifiers);
             if(errorIdentifiers.Count > 0) 
                 ShowErrorIdentifiers(errorIdentifiers);
@@ -93,7 +94,6 @@ namespace TestTask1
             }
             FillTable(identifiers);
         }
-
         //Fills a data grid
         private void FillTable(IEnumerable<IdentifierInfo> identifiers)
         {
