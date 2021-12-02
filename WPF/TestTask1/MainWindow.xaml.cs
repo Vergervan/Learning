@@ -69,11 +69,12 @@ namespace TestTask1
                     errorIdentifiers.Add(str);
                 }
             }
-            List<IdentifierInfo> identifiers = identifiersInt.Distinct().Select(x => new IdentifierInfo(x)).ToList();
+            List<IdentifierInfo> identifiers = identifiersInt.Distinct().Select(x => new IdentifierInfo(x)).ToList(); //Removing dublicates of identifiers
             FillIdentifiersFromServer(identifiers);
             if(errorIdentifiers.Count > 0) 
                 ShowErrorIdentifiers(errorIdentifiers);
         }
+        //Requests a server to get string by identifier
         private void FillIdentifiersFromServer(IEnumerable<IdentifierInfo> identifiers)
         {
             using (WebClient wc = new WebClient())
